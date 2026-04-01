@@ -115,8 +115,10 @@ function SwampySoundboardPage() {
     },
   };
 
-  const activeSceneLabel = sectionData.scenes.find((scene) => scene.id === activeScene)?.label || 'default';
-  const currentSceneTheme = sceneThemeMap[normalizeLabel(activeSceneLabel)] || sceneThemeMap.default;
+  const activeSceneLabel = sectionData.scenes.find((scene) => scene.id === activeScene)?.label;
+  const currentSceneTheme = activeSceneLabel
+    ? sceneThemeMap[normalizeLabel(activeSceneLabel)] || sceneThemeMap.default
+    : null;
 
   const emojiMap = {
     actions: {
@@ -245,15 +247,17 @@ function SwampySoundboardPage() {
   };
 
   return (
-    <main className="relative h-[100dvh] overflow-hidden bg-black p-2 sm:p-3">
-      <div
-        className="pointer-events-none absolute inset-0 transition-all duration-700"
-        style={{ background: currentSceneTheme.sceneColor, opacity: 0.42 }}
-      />
+    <main className="relative h-[100dvh] overflow-hidden bg-white p-2 sm:p-3">
+      {currentSceneTheme && (
+        <div
+          className="pointer-events-none absolute inset-0 transition-all duration-700"
+          style={{ background: currentSceneTheme.sceneColor, opacity: 0.42 }}
+        />
+      )}
 
       <div
         className="relative mx-auto flex h-full w-full max-w-5xl flex-col gap-1 border-4 border-neutral-900/90 p-1 shadow-2xl sm:gap-2"
-        style={{ background: currentSceneTheme.boardBackground }}
+        style={{ background: currentSceneTheme ? currentSceneTheme.boardBackground : '#ffffff' }}
       >
         <header className="px-2 py-1 text-center">
           <h1 className="text-xl font-black uppercase tracking-wide text-white drop-shadow sm:text-2xl">
@@ -268,7 +272,7 @@ function SwampySoundboardPage() {
         )}
 
         <section className="row-panel">
-          <div className="row-scroller">
+          <div className="row-scroller" style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.actions.length, 1)}, minmax(0, 1fr))` }}>
             {sectionData.actions.map((action) => {
               const isActive = activeOneShot === action.id;
               return (
@@ -285,34 +289,32 @@ function SwampySoundboardPage() {
           </div>
         </section>
 
-        <section className="row-panel row-panel-characters" style={{ background: currentSceneTheme.sceneColor }}>
-          <div className="storybook-ground">
+        <section
+          className="row-panel row-panel-characters"
+          style={{ background: currentSceneTheme ? currentSceneTheme.sceneColor : '#ffffff' }}
+        >
+          <div
+            className="storybook-ground"
+            style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.characters.length, 1)}, minmax(0, 1fr))` }}
+          >
             {sectionData.characters.map((character) => {
               const isActive = activeOneShot === character.id;
               return (
-                <span
+                <button
                   key={character.id}
-                  role="button"
-                  tabIndex={0}
                   aria-label={character.label}
                   onClick={() => triggerOneShot(character)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      triggerOneShot(character);
-                    }
-                  }}
                   className={`character-emoji ${isActive ? 'emoji-active' : ''}`}
                 >
                   {getEmojiLabel('characters', character.label)}
-                </span>
+                </button>
               );
             })}
           </div>
         </section>
 
         <section className="row-panel">
-          <div className="row-scroller">
+          <div className="row-scroller" style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.emotionsMelodies.length, 1)}, minmax(0, 1fr))` }}>
             {sectionData.emotionsMelodies.map((emotion) => {
               const isActive = activeEmotionMelody === emotion.id;
               return (
@@ -320,7 +322,7 @@ function SwampySoundboardPage() {
                   key={emotion.id}
                   type="button"
                   onClick={() => toggleEmotionMelody(emotion)}
-                  className={`pill-button min-w-24 bg-orange-700 text-white ${isActive ? 'button-glow-active' : ''}`}
+                  className={`pill-button bg-orange-700 text-white ${isActive ? 'button-glow-active' : ''}`}
                 >
                   <p className="text-2xl">{getEmojiLabel('emotionsMelodies', emotion.label)}</p>
                 </button>
@@ -330,7 +332,7 @@ function SwampySoundboardPage() {
         </section>
 
         <section className="row-panel">
-          <div className="row-scroller">
+          <div className="row-scroller" style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.scenes.length, 1)}, minmax(0, 1fr))` }}>
             {sectionData.scenes.map((scene) => {
               const isSelected = activeScene === scene.id;
               const sceneLabel = normalizeLabel(scene.label);
@@ -391,21 +393,21 @@ function SwampySoundboardPage() {
         .row-scroller {
           flex: 1;
           min-height: 0;
-          display: flex;
-          flex-wrap: nowrap;
-          align-items: center;
-          gap: 0.5rem;
-          overflow-x: auto;
-          overflow-y: hidden;
-          scrollbar-width: thin;
-          -webkit-overflow-scrolling: touch;
+          display: grid;
+          align-items: stretch;
+          gap: 0.45rem;
+          overflow: hidden;
           padding: 0.1rem 0.25rem;
         }
 
         .pill-button {
-          flex: 0 0 auto;
-          min-height: 2.8rem;
-          min-width: 4.2rem;
+          width: 100%;
+          height: 100%;
+          min-height: 0;
+          min-width: 0;
+          display: grid;
+          place-items: center;
+          text-align: center;
           border-radius: 0.95rem;
           border: 2px solid rgba(120, 53, 15, 0.6);
           padding: 0.2rem 0.6rem;
@@ -415,26 +417,29 @@ function SwampySoundboardPage() {
         .storybook-ground {
           flex: 1;
           min-height: 0;
-          display: flex;
-          flex-wrap: nowrap;
-          align-items: flex-end;
+          display: grid;
+          align-items: stretch;
           gap: 0.35rem;
-          overflow-x: auto;
-          overflow-y: hidden;
-          -webkit-overflow-scrolling: touch;
+          overflow: hidden;
           padding: 0 0.4rem 0.1rem;
           border-radius: 1rem;
           background: linear-gradient(to top, rgba(0, 0, 0, 0.2) 0%, rgba(255, 255, 255, 0.07) 55%, rgba(255, 255, 255, 0) 100%);
         }
 
         .character-emoji {
-          flex: 0 0 auto;
-          font-size: clamp(3rem, 8vw, 4rem);
+          width: 100%;
+          height: 100%;
+          border: 0;
+          border-radius: 0.85rem;
+          background: rgba(255, 255, 255, 0.16);
+          font-size: clamp(2.5rem, 6vw, 4rem);
           line-height: 1;
           cursor: pointer;
           user-select: none;
-          transform: translateY(8%);
-          transition: transform 180ms ease, filter 180ms ease;
+          display: grid;
+          place-items: center;
+          transform: translateY(0);
+          transition: transform 180ms ease, filter 180ms ease, background-color 180ms ease;
           filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.35));
         }
 
@@ -442,6 +447,7 @@ function SwampySoundboardPage() {
         .character-emoji:hover {
           transform: translateY(0);
           filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.45));
+          background: rgba(255, 255, 255, 0.24);
         }
 
         .emoji-active {
