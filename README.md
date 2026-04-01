@@ -27,3 +27,15 @@ Whenever you add or remove files in `audio-assets/`, regenerate the manifest:
 ```bash
 node generate-audio-manifest.mjs
 ```
+
+Notes:
+- the UI shouldn't look very busy - even in a phone.
+- simple animations that make it clear which sound is turned on.
+
+## TODO
+
+- master sounds
+- find and make images
+- consider a stage-like minimal UI
+- consider animations
+- recording functionality for voice
