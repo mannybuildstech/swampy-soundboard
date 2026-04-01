@@ -1,92 +1,217 @@
+const { useEffect, useState } = React;
+
 function SwampySoundboardPage() {
-  const animalSounds = [
-    { name: 'Crane', emoji: '🕊️' },
-    { name: 'Owl', emoji: '🦉' },
-    { name: 'Manatee', emoji: '🦭' },
+  const [activeScene, setActiveScene] = useState('River');
+  const [visibleScene, setVisibleScene] = useState('River');
+  const [fadingScene, setFadingScene] = useState(null);
+  const [activeOneShot, setActiveOneShot] = useState(null);
+  const [orientation, setOrientation] = useState(window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
+
+  useEffect(() => {
+    const updateOrientation = () => {
+      setOrientation(window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
+    };
+
+    window.addEventListener('resize', updateOrientation);
+    window.addEventListener('orientationchange', updateOrientation);
+
+    return () => {
+      window.removeEventListener('resize', updateOrientation);
+      window.removeEventListener('orientationchange', updateOrientation);
+    };
+  }, []);
+
+  const actions = [
+    { name: 'Splashes!', emoji: '💦', color: 'bg-cyan-600' },
+    { name: 'Run!', emoji: '👟', color: 'bg-orange-600' },
+    { name: 'Climb!', emoji: '🪵', color: 'bg-amber-600' },
+    { name: 'Rustle!', emoji: '🌿', color: 'bg-lime-700' },
+    { name: 'Jump!', emoji: '⬆️', color: 'bg-green-700' },
+  ];
+
+  const characters = [
+    { name: 'Crane', emoji: '🪶' },
     { name: 'Cardinal', emoji: '🐦' },
+    { name: 'Laughing Gull', emoji: '🕊️' },
+    { name: 'Coot', emoji: '🦆' },
     { name: 'Alligator', emoji: '🐊' },
+    { name: 'Racoon', emoji: '🦝' },
   ];
 
-  const adventureMelodies = [
-    { name: 'Harmonica Adventure', icon: '🎵' },
-    { name: 'Bongos Rhythm', icon: '🥁' },
-    { name: 'Mystery Keys', icon: '🎹' },
+  const emotions = [
+    { name: 'Celebrate!', emoji: '🎉', tint: 'bg-cyan-700' },
+    { name: 'Build Tension!', emoji: '😬', tint: 'bg-yellow-700' },
+    { name: 'Problem!', emoji: '❗', tint: 'bg-orange-700' },
   ];
 
-  const soundscapes = [
-    { name: 'Swamp', gradient: 'from-teal-400 to-emerald-500' },
-    { name: 'Rain', gradient: 'from-sky-400 to-indigo-500' },
-    { name: 'River', gradient: 'from-cyan-400 to-blue-500' },
-    { name: 'Beach', gradient: 'from-amber-300 to-sky-400' },
-    { name: 'Underwater', gradient: 'from-blue-500 to-violet-500' },
+  const environments = [
+    { name: 'Wind!', color: '#67c1d8' },
+    { name: 'Rain!', color: '#4f7baf' },
+    { name: 'Beach!', color: '#f0b35a' },
+    { name: 'River', color: '#67a5a1' },
+    { name: 'Night!', color: '#26314d' },
   ];
+
+  const sceneColor = environments.find((scene) => scene.name === visibleScene)?.color ?? '#67a5a1';
+  const fadingColor = fadingScene
+    ? environments.find((scene) => scene.name === fadingScene)?.color ?? '#67a5a1'
+    : null;
+
+  const vibrateTap = () => {
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(35);
+    }
+  };
+
+  const triggerOneShot = (key) => {
+    vibrateTap();
+    setActiveOneShot(key);
+    window.setTimeout(() => {
+      setActiveOneShot((current) => (current === key ? null : current));
+    }, 3000);
+  };
+
+  const changeEnvironment = (nextScene) => {
+    vibrateTap();
+    if (nextScene === activeScene) return;
+    setFadingScene(visibleScene);
+    setVisibleScene(nextScene);
+    setActiveScene(nextScene);
+    window.setTimeout(() => setFadingScene(null), 500);
+  };
 
   return (
-    <main className="min-h-screen bg-sky-50 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-7xl flex-col gap-4 rounded-[2rem] bg-white p-5 shadow-xl shadow-sky-100 sm:gap-5 sm:p-6 lg:gap-6 lg:p-8">
-        <header className="rounded-3xl bg-gradient-to-r from-emerald-100 via-lime-100 to-cyan-100 py-4 text-center shadow-sm sm:py-5">
-          <h1 className="text-3xl font-black tracking-tight text-emerald-700 sm:text-4xl lg:text-5xl">
-            Swampy Soundboard
-          </h1>
-        </header>
+    <main className="relative min-h-screen overflow-hidden bg-slate-900 p-3 sm:p-6">
+      <div
+        className="pointer-events-none absolute inset-0 transition-opacity duration-500"
+        style={{ backgroundColor: sceneColor, opacity: 0.92 }}
+      />
+      {fadingColor && (
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ backgroundColor: fadingColor, animation: 'sceneFadeOut 500ms ease forwards' }}
+        />
+      )}
 
-        <section className="rounded-3xl bg-emerald-50 p-4 shadow-md shadow-emerald-100 sm:p-5">
-          <h2 className="mb-4 text-xl font-bold text-emerald-700 sm:text-2xl">Animal Sounds</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {animalSounds.map((animal) => (
-              <button
-                key={animal.name}
-                type="button"
-                className="rounded-2xl bg-white p-3 text-left shadow-sm ring-1 ring-emerald-100"
-              >
-                <div className="mb-2 grid aspect-square place-items-center rounded-xl bg-emerald-100 text-4xl sm:text-5xl">
-                  <span aria-hidden>{animal.emoji}</span>
-                </div>
-                <p className="text-center text-base font-semibold text-emerald-800 sm:text-lg">{animal.name}</p>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-3xl bg-amber-50 p-4 shadow-md shadow-amber-100 sm:p-5">
-          <h2 className="mb-4 text-xl font-bold text-amber-700 sm:text-2xl">Adventure Melodies</h2>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {adventureMelodies.map((melody) => (
-              <button
-                key={melody.name}
-                type="button"
-                className="flex min-h-28 items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-amber-100"
-              >
-                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-amber-100 text-3xl">
-                  <span aria-hidden>{melody.icon}</span>
-                </div>
-                <p className="text-left text-base font-semibold leading-tight text-amber-800 sm:text-lg">{melody.name}</p>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="grid flex-1 rounded-3xl bg-blue-100/80 p-4 shadow-md shadow-blue-200 sm:p-5">
-          <div>
-            <h2 className="mb-4 text-xl font-bold text-blue-700 sm:text-2xl">Soundscapes</h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              {soundscapes.map((scape) => (
+      <div className={`relative mx-auto flex w-full max-w-5xl flex-col gap-3 rounded-[2.5rem] border-8 border-neutral-900/90 bg-[#f2dfbc]/95 p-3 shadow-2xl sm:p-5 ${orientation === 'landscape' ? 'landscape-board' : ''}`}>
+        <section className="rounded-3xl border-4 border-amber-900/40 bg-[#f8e9ca] p-3 shadow-inner">
+          <h2 className="mb-3 text-center text-2xl font-black italic text-amber-900 sm:text-3xl">Actions</h2>
+          <div className="grid grid-cols-5 gap-2">
+            {actions.map((action) => {
+              const oneShotKey = `action-${action.name}`;
+              const isActive = activeOneShot === oneShotKey;
+              return (
                 <button
-                  key={scape.name}
+                  key={action.name}
                   type="button"
-                  className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-blue-100"
+                  onClick={() => triggerOneShot(oneShotKey)}
+                  className={`rounded-2xl border-2 border-amber-900/50 p-2 text-white shadow-md transition ${action.color} ${isActive ? 'one-shot-active' : ''}`}
                 >
-                  <div
-                    className={`mb-3 h-20 rounded-xl bg-gradient-to-br ${scape.gradient} sm:h-24 lg:h-20`}
-                    aria-hidden
-                  />
-                  <p className="text-center text-base font-semibold text-blue-800 sm:text-lg">{scape.name}</p>
+                  <div className="text-2xl sm:text-3xl">{action.emoji}</div>
+                  <p className="text-xs font-bold sm:text-lg">{action.name}</p>
                 </button>
-              ))}
-            </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border-4 border-amber-900/40 bg-sky-200/70 p-3">
+          <h2 className="mb-3 text-center text-2xl font-black italic text-amber-900 sm:text-3xl">Characters</h2>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            {characters.map((character) => {
+              const oneShotKey = `character-${character.name}`;
+              const isActive = activeOneShot === oneShotKey;
+              return (
+                <button
+                  key={character.name}
+                  type="button"
+                  onClick={() => triggerOneShot(oneShotKey)}
+                  className={`aspect-square rounded-full border-4 border-amber-900/70 bg-yellow-50 text-center shadow-md transition ${isActive ? 'one-shot-active' : ''}`}
+                >
+                  <div className="text-3xl sm:text-4xl">{character.emoji}</div>
+                  <p className="px-1 text-[10px] font-bold text-amber-900 sm:text-xs">{character.name}</p>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border-4 border-amber-900/40 bg-[#f8e9ca] p-3">
+          <h2 className="mb-3 text-center text-2xl font-black italic text-amber-900 sm:text-3xl">Emotions</h2>
+          <div className="grid grid-cols-3 gap-3">
+            {emotions.map((emotion) => {
+              const oneShotKey = `emotion-${emotion.name}`;
+              const isActive = activeOneShot === oneShotKey;
+              return (
+                <button
+                  key={emotion.name}
+                  type="button"
+                  onClick={() => triggerOneShot(oneShotKey)}
+                  className={`min-h-20 rounded-full border-4 border-amber-900/70 p-3 text-white shadow-md transition sm:min-h-24 ${emotion.tint} ${isActive ? 'one-shot-active' : ''}`}
+                >
+                  <div className="text-3xl sm:text-4xl">{emotion.emoji}</div>
+                  <p className="text-sm font-black sm:text-lg">{emotion.name}</p>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border-4 border-amber-900/40 bg-sky-200/70 p-3">
+          <h2 className="mb-3 text-center text-2xl font-black italic text-amber-900 sm:text-3xl">Environment</h2>
+          <div className="grid grid-cols-5 gap-2">
+            {environments.map((scene) => {
+              const isSelected = activeScene === scene.name;
+              return (
+                <button
+                  key={scene.name}
+                  type="button"
+                  onClick={() => changeEnvironment(scene.name)}
+                  className={`rounded-2xl border-2 border-amber-900/60 p-2 text-white shadow-md transition ${isSelected ? 'scene-active' : ''}`}
+                  style={{ backgroundColor: scene.color }}
+                >
+                  <div className="mb-2 h-8 rounded-lg border border-white/40 sm:h-10" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
+                  <p className="text-xs font-black sm:text-lg">{scene.name}</p>
+                </button>
+              );
+            })}
           </div>
         </section>
       </div>
+
+      <style>{`
+        @keyframes neonPulse {
+          0% { box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
+          20% { box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.95), 0 0 20px rgba(16, 185, 129, 0.95); }
+          100% { box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
+        }
+
+        @keyframes sceneFadeOut {
+          from { opacity: 0.92; }
+          to { opacity: 0; }
+        }
+
+        .one-shot-active {
+          animation: neonPulse 3s ease forwards;
+        }
+
+        .scene-active {
+          box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.95), 0 0 16px rgba(16, 185, 129, 1);
+          border-color: rgba(34, 211, 238, 1) !important;
+        }
+
+        @media (orientation: landscape) and (max-height: 700px) {
+          .landscape-board {
+            gap: 0.6rem;
+            padding: 0.65rem;
+          }
+
+          .landscape-board h2 {
+            margin-bottom: 0.45rem;
+            font-size: 1.45rem;
+          }
+        }
+      `}</style>
     </main>
   );
 }
