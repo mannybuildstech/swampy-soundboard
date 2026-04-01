@@ -247,7 +247,7 @@ function SwampySoundboardPage() {
   };
 
   return (
-    <main className="relative h-[100dvh] overflow-hidden bg-white p-2 sm:p-3">
+    <main className="relative h-full min-h-full w-full overflow-hidden bg-white p-0">
       {currentSceneTheme && (
         <div
           className="pointer-events-none absolute inset-0 transition-all duration-700"
@@ -256,11 +256,11 @@ function SwampySoundboardPage() {
       )}
 
       <div
-        className="relative mx-auto flex h-full w-full max-w-5xl flex-col gap-1 border-4 border-neutral-900/90 p-1 shadow-2xl sm:gap-2"
+        className="relative flex h-full w-full flex-col gap-1 p-2 sm:gap-2 sm:p-3"
         style={{ background: currentSceneTheme ? currentSceneTheme.boardBackground : '#ffffff' }}
       >
-        <header className="px-2 py-1 text-center">
-          <h1 className="text-xl font-black uppercase tracking-wide text-white drop-shadow sm:text-2xl">
+        <header className="px-2 py-1 text-center sm:py-2">
+          <h1 className="text-2xl font-black uppercase tracking-wide text-white drop-shadow sm:text-3xl lg:text-4xl">
             Swampy Story Maker
           </h1>
         </header>
@@ -282,7 +282,7 @@ function SwampySoundboardPage() {
                   onClick={() => triggerOneShot(action)}
                   className={`pill-button bg-cyan-700 text-white ${isActive ? 'button-glow-active' : ''}`}
                 >
-                  <p className="text-2xl font-bold">{getEmojiLabel('actions', action.label)}</p>
+                  <p className="emoji-glyph font-bold">{getEmojiLabel('actions', action.label)}</p>
                 </button>
               );
             })}
@@ -324,7 +324,7 @@ function SwampySoundboardPage() {
                   onClick={() => toggleEmotionMelody(emotion)}
                   className={`pill-button bg-orange-700 text-white ${isActive ? 'button-glow-active' : ''}`}
                 >
-                  <p className="text-2xl">{getEmojiLabel('emotionsMelodies', emotion.label)}</p>
+                  <p className="emoji-glyph">{getEmojiLabel('emotionsMelodies', emotion.label)}</p>
                 </button>
               );
             })}
@@ -345,7 +345,7 @@ function SwampySoundboardPage() {
                   className={`pill-button text-white ${isSelected ? 'button-glow-active' : ''}`}
                   style={{ background: sceneTheme.swatch }}
                 >
-                  <p className="text-2xl">{getEmojiLabel('scenes', scene.label)}</p>
+                  <p className="emoji-glyph">{getEmojiLabel('scenes', scene.label)}</p>
                 </button>
               );
             })}
@@ -375,7 +375,7 @@ function SwampySoundboardPage() {
         }
 
         .row-panel {
-          flex: 0.8;
+          flex: 1;
           min-height: 0;
           border: 0;
           border-radius: 0;
@@ -387,7 +387,7 @@ function SwampySoundboardPage() {
         }
 
         .row-panel-characters {
-          flex: 1.8;
+          flex: 2.2;
         }
 
         .row-scroller {
@@ -414,6 +414,11 @@ function SwampySoundboardPage() {
           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
+        .emoji-glyph {
+          font-size: clamp(2rem, min(7vw, 7vh), 6rem);
+          line-height: 1;
+        }
+
         .storybook-ground {
           flex: 1;
           min-height: 0;
@@ -432,7 +437,7 @@ function SwampySoundboardPage() {
           border: 0;
           border-radius: 0.85rem;
           background: rgba(255, 255, 255, 0.16);
-          font-size: clamp(2.5rem, 6vw, 4rem);
+          font-size: clamp(2.8rem, min(10vw, 14vh), 8rem);
           line-height: 1;
           cursor: pointer;
           user-select: none;
