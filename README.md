@@ -12,3 +12,18 @@ This site is intentionally served directly from the repository root so GitHub Pa
 3. Save.
 
 After that, every commit to `main` redeploys the site from the root files (`index.html` + `app.jsx`).
+
+## Audio assets and dynamic buttons
+
+The soundboard UI is generated from `audio-assets/manifest.json` with these sections:
+
+- `actions` (one-shot, first 5s)
+- `characters` (one-shot, first 5s)
+- `emotions-melodies` (one-shot, first 5s)
+- `scenes` (loops continuously)
+
+Whenever you add or remove files in `audio-assets/`, regenerate the manifest:
+
+```bash
+node generate-audio-manifest.mjs
+```

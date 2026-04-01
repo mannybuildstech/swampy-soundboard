@@ -1,0 +1,28 @@
+{
+  "actions": [
+    "action-magic.wav",
+    "action-running.wav",
+    "action-rustling.mp3",
+    "action-walking.mp3",
+    "action-water-splash.wav"
+  ],
+  "characters": [
+    "char-alligator.wav",
+    "char-cardinal.mp3",
+    "char-coot.mp3",
+    "char-crane.mp3",
+    "char-panther.wav"
+  ],
+  "emotions-melodies": [
+    "bongo-buildup.wav",
+    "harmonica-buildup.wav",
+    "harmonica-end.wav",
+    "piano-upbeat.mp3"
+  ],
+  "scenes": [
+    "beach.wav",
+    "lake.wav",
+    "underwater.wav",
+    "woods.wav"
+  ]
+}
