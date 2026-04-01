@@ -252,9 +252,15 @@ function SwampySoundboardPage() {
       />
 
       <div
-        className="relative mx-auto flex h-full w-full max-w-5xl flex-col gap-2 rounded-[2rem] border-4 border-neutral-900/90 p-2 shadow-2xl sm:gap-3"
+        className="relative mx-auto flex h-full w-full max-w-5xl flex-col gap-1 border-4 border-neutral-900/90 p-1 shadow-2xl sm:gap-2"
         style={{ background: currentSceneTheme.boardBackground }}
       >
+        <header className="px-2 py-1 text-center">
+          <h1 className="text-xl font-black uppercase tracking-wide text-white drop-shadow sm:text-2xl">
+            Swampy Story Maker
+          </h1>
+        </header>
+
         {loadError && (
           <section className="rounded-2xl border-2 border-red-700/50 bg-red-100 p-2 text-xs font-bold text-red-800 sm:text-sm">
             {loadError}
@@ -262,7 +268,6 @@ function SwampySoundboardPage() {
         )}
 
         <section className="row-panel">
-          <h2 className="row-title">🏃💨✨</h2>
           <div className="row-scroller">
             {sectionData.actions.map((action) => {
               const isActive = activeOneShot === action.id;
@@ -280,8 +285,7 @@ function SwampySoundboardPage() {
           </div>
         </section>
 
-        <section className="row-panel" style={{ background: currentSceneTheme.sceneColor }}>
-          <h2 className="row-title text-white/90">🐊🦆🐦</h2>
+        <section className="row-panel row-panel-characters" style={{ background: currentSceneTheme.sceneColor }}>
           <div className="storybook-ground">
             {sectionData.characters.map((character) => {
               const isActive = activeOneShot === character.id;
@@ -308,7 +312,6 @@ function SwampySoundboardPage() {
         </section>
 
         <section className="row-panel">
-          <h2 className="row-title">🎵🎶🎹</h2>
           <div className="row-scroller">
             {sectionData.emotionsMelodies.map((emotion) => {
               const isActive = activeEmotionMelody === emotion.id;
@@ -327,7 +330,6 @@ function SwampySoundboardPage() {
         </section>
 
         <section className="row-panel">
-          <h2 className="row-title">🌍🌈</h2>
           <div className="row-scroller">
             {sectionData.scenes.map((scene) => {
               const isSelected = activeScene === scene.id;
@@ -371,25 +373,19 @@ function SwampySoundboardPage() {
         }
 
         .row-panel {
-          flex: 1;
+          flex: 0.8;
           min-height: 0;
-          border-radius: 1.25rem;
-          border: 3px solid rgba(120, 53, 15, 0.45);
-          background: #f8e9ca;
-          padding: 0.5rem;
+          border: 0;
+          border-radius: 0;
+          background: #ffffff;
+          padding: 0.35rem 0.2rem;
           display: flex;
           flex-direction: column;
           overflow: hidden;
         }
 
-        .row-title {
-          margin: 0 0 0.35rem;
-          text-align: center;
-          font-size: clamp(1.25rem, 2.4vw, 1.8rem);
-          font-weight: 900;
-          font-style: italic;
-          line-height: 1;
-          color: #78350f;
+        .row-panel-characters {
+          flex: 1.8;
         }
 
         .row-scroller {
@@ -403,7 +399,7 @@ function SwampySoundboardPage() {
           overflow-y: hidden;
           scrollbar-width: thin;
           -webkit-overflow-scrolling: touch;
-          padding: 0.15rem 0.2rem;
+          padding: 0.1rem 0.25rem;
         }
 
         .pill-button {
