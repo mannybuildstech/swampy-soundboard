@@ -6,23 +6,9 @@ function SwampySoundboardPage() {
   const [activeOneShot, setActiveOneShot] = useState(null);
   const [manifest, setManifest] = useState(null);
   const [loadError, setLoadError] = useState('');
-  const [orientation, setOrientation] = useState(window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
   const sceneAudioRef = useRef(null);
   const emotionAudioRef = useRef(null);
-
-  useEffect(() => {
-    const updateOrientation = () => {
-      setOrientation(window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
-    };
-
-    window.addEventListener('resize', updateOrientation);
-    window.addEventListener('orientationchange', updateOrientation);
-
-    return () => {
-      window.removeEventListener('resize', updateOrientation);
-      window.removeEventListener('orientationchange', updateOrientation);
-    };
-  }, []);
+  const audioCacheRef = useRef(new Map());
 
   useEffect(() => {
     const loadManifest = async () => {
@@ -80,6 +66,24 @@ function SwampySoundboardPage() {
       scenes: normalize('scenes', manifest.scenes),
     };
   }, [manifest]);
+
+  useEffect(() => {
+    const allSounds = [
+      ...sectionData.actions,
+      ...sectionData.characters,
+      ...sectionData.emotionsMelodies,
+      ...sectionData.scenes,
+    ];
+
+    allSounds.forEach((sound) => {
+      if (!audioCacheRef.current.has(sound.id)) {
+        const audio = new Audio(sound.src);
+        audio.preload = 'auto';
+        audio.load();
+        audioCacheRef.current.set(sound.id, audio);
+      }
+    });
+  }, [sectionData]);
 
   const normalizeLabel = (value) => value.toLowerCase();
 
@@ -165,11 +169,19 @@ function SwampySoundboardPage() {
     }
   };
 
+  const buildPlaybackAudio = (sound, { loop = false } = {}) => {
+    const cachedAudio = audioCacheRef.current.get(sound.id);
+    const audio = cachedAudio ? cachedAudio.cloneNode() : new Audio(sound.src);
+    audio.preload = 'auto';
+    audio.loop = loop;
+    audio.currentTime = 0;
+    return audio;
+  };
+
   const triggerOneShot = (sound) => {
     vibrateTap();
 
-    const audio = new Audio(sound.src);
-    audio.currentTime = 0;
+    const audio = buildPlaybackAudio(sound);
     audio.play().catch(() => {});
 
     setActiveOneShot(sound.id);
@@ -201,9 +213,7 @@ function SwampySoundboardPage() {
       emotionAudioRef.current = null;
     }
 
-    const nextAudio = new Audio(melody.src);
-    nextAudio.loop = true;
-    nextAudio.currentTime = 0;
+    const nextAudio = buildPlaybackAudio(melody, { loop: true });
     nextAudio.play().catch(() => {});
 
     emotionAudioRef.current = nextAudio;
@@ -227,9 +237,7 @@ function SwampySoundboardPage() {
       sceneAudioRef.current = null;
     }
 
-    const nextAudio = new Audio(scene.src);
-    nextAudio.loop = true;
-    nextAudio.currentTime = 0;
+    const nextAudio = buildPlaybackAudio(scene, { loop: true });
     nextAudio.play().catch(() => {});
 
     sceneAudioRef.current = nextAudio;
@@ -237,25 +245,25 @@ function SwampySoundboardPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black p-3 sm:p-6">
+    <main className="relative h-[100dvh] overflow-hidden bg-black p-2 sm:p-3">
       <div
         className="pointer-events-none absolute inset-0 transition-all duration-700"
         style={{ background: currentSceneTheme.sceneColor, opacity: 0.42 }}
       />
 
       <div
-        className={`relative mx-auto flex w-full max-w-5xl flex-col gap-3 rounded-[2.5rem] border-8 border-neutral-900/90 p-3 shadow-2xl sm:p-5 ${orientation === 'landscape' ? 'landscape-board' : ''}`}
+        className="relative mx-auto flex h-full w-full max-w-5xl flex-col gap-2 rounded-[2rem] border-4 border-neutral-900/90 p-2 shadow-2xl sm:gap-3"
         style={{ background: currentSceneTheme.boardBackground }}
       >
         {loadError && (
-          <section className="rounded-2xl border-2 border-red-700/50 bg-red-100 p-3 text-sm font-bold text-red-800">
+          <section className="rounded-2xl border-2 border-red-700/50 bg-red-100 p-2 text-xs font-bold text-red-800 sm:text-sm">
             {loadError}
           </section>
         )}
 
-        <section className="rounded-3xl border-4 border-amber-900/40 bg-[#f8e9ca] p-3 shadow-inner">
-          <h2 className="mb-3 text-center text-2xl font-black italic text-amber-900 sm:text-3xl">🏃💨✨</h2>
-          <div className="flex flex-wrap justify-center gap-2">
+        <section className="row-panel">
+          <h2 className="row-title">🏃💨✨</h2>
+          <div className="row-scroller">
             {sectionData.actions.map((action) => {
               const isActive = activeOneShot === action.id;
               return (
@@ -263,37 +271,45 @@ function SwampySoundboardPage() {
                   key={action.id}
                   type="button"
                   onClick={() => triggerOneShot(action)}
-                  className={`min-h-14 min-w-20 rounded-2xl border-2 border-amber-900/50 bg-cyan-700 p-2 text-white shadow-md transition ${isActive ? 'button-glow-active' : ''}`}
+                  className={`pill-button bg-cyan-700 text-white ${isActive ? 'button-glow-active' : ''}`}
                 >
-                  <p className="text-xl font-bold capitalize sm:text-2xl">{getEmojiLabel('actions', action.label)}</p>
+                  <p className="text-2xl font-bold">{getEmojiLabel('actions', action.label)}</p>
                 </button>
               );
             })}
           </div>
         </section>
 
-        <section className="rounded-3xl border-4 border-amber-900/40 bg-sky-200/70 p-3">
-          <h2 className="mb-3 text-center text-2xl font-black italic text-amber-900 sm:text-3xl">🐊🦆🐦</h2>
-          <div className="flex flex-wrap justify-center gap-3">
+        <section className="row-panel" style={{ background: currentSceneTheme.sceneColor }}>
+          <h2 className="row-title text-white/90">🐊🦆🐦</h2>
+          <div className="storybook-ground">
             {sectionData.characters.map((character) => {
               const isActive = activeOneShot === character.id;
               return (
-                <button
+                <span
                   key={character.id}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={character.label}
                   onClick={() => triggerOneShot(character)}
-                  className={`grid h-20 w-20 place-items-center rounded-full border-4 border-amber-900/70 bg-yellow-50 text-center shadow-md transition sm:h-24 sm:w-24 ${isActive ? 'button-glow-active' : ''}`}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      triggerOneShot(character);
+                    }
+                  }}
+                  className={`character-emoji ${isActive ? 'emoji-active' : ''}`}
                 >
-                  <p className="text-2xl sm:text-3xl">{getEmojiLabel('characters', character.label)}</p>
-                </button>
+                  {getEmojiLabel('characters', character.label)}
+                </span>
               );
             })}
           </div>
         </section>
 
-        <section className="rounded-3xl border-4 border-amber-900/40 bg-[#f8e9ca] p-3">
-          <h2 className="mb-3 text-center text-2xl font-black italic text-amber-900 sm:text-3xl">🎵🎶🎹</h2>
-          <div className="flex flex-wrap justify-center gap-3">
+        <section className="row-panel">
+          <h2 className="row-title">🎵🎶🎹</h2>
+          <div className="row-scroller">
             {sectionData.emotionsMelodies.map((emotion) => {
               const isActive = activeEmotionMelody === emotion.id;
               return (
@@ -301,18 +317,18 @@ function SwampySoundboardPage() {
                   key={emotion.id}
                   type="button"
                   onClick={() => toggleEmotionMelody(emotion)}
-                  className={`grid min-h-20 min-w-28 place-items-center rounded-2xl border-4 border-amber-900/70 bg-orange-700 p-3 text-white shadow-md transition sm:min-h-24 sm:min-w-32 ${isActive ? 'button-glow-active' : ''}`}
+                  className={`pill-button min-w-24 bg-orange-700 text-white ${isActive ? 'button-glow-active' : ''}`}
                 >
-                  <p className="text-2xl sm:text-3xl">{getEmojiLabel('emotionsMelodies', emotion.label)}</p>
+                  <p className="text-2xl">{getEmojiLabel('emotionsMelodies', emotion.label)}</p>
                 </button>
               );
             })}
           </div>
         </section>
 
-        <section className="rounded-3xl border-4 border-amber-900/40 bg-sky-200/70 p-3">
-          <h2 className="mb-3 text-center text-2xl font-black italic text-amber-900 sm:text-3xl">🌍🌈</h2>
-          <div className="flex flex-wrap justify-center gap-2">
+        <section className="row-panel">
+          <h2 className="row-title">🌍🌈</h2>
+          <div className="row-scroller">
             {sectionData.scenes.map((scene) => {
               const isSelected = activeScene === scene.id;
               const sceneLabel = normalizeLabel(scene.label);
@@ -322,10 +338,9 @@ function SwampySoundboardPage() {
                   key={scene.id}
                   type="button"
                   onClick={() => changeEnvironment(scene)}
-                  className={`w-24 rounded-2xl border-2 border-amber-900/60 p-2 text-white shadow-md transition ${isSelected ? 'button-glow-active' : ''}`}
+                  className={`pill-button text-white ${isSelected ? 'button-glow-active' : ''}`}
                   style={{ background: sceneTheme.swatch }}
                 >
-                  <div className="mb-2 h-8 rounded-lg border border-white/40 bg-white/20 sm:h-10" />
                   <p className="text-2xl">{getEmojiLabel('scenes', scene.label)}</p>
                 </button>
               );
@@ -355,16 +370,86 @@ function SwampySoundboardPage() {
           filter: brightness(1.12) saturate(1.15);
         }
 
-        @media (orientation: landscape) and (max-height: 700px) {
-          .landscape-board {
-            gap: 0.6rem;
-            padding: 0.65rem;
-          }
+        .row-panel {
+          flex: 1;
+          min-height: 0;
+          border-radius: 1.25rem;
+          border: 3px solid rgba(120, 53, 15, 0.45);
+          background: #f8e9ca;
+          padding: 0.5rem;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
 
-          .landscape-board h2 {
-            margin-bottom: 0.45rem;
-            font-size: 1.45rem;
-          }
+        .row-title {
+          margin: 0 0 0.35rem;
+          text-align: center;
+          font-size: clamp(1.25rem, 2.4vw, 1.8rem);
+          font-weight: 900;
+          font-style: italic;
+          line-height: 1;
+          color: #78350f;
+        }
+
+        .row-scroller {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          flex-wrap: nowrap;
+          align-items: center;
+          gap: 0.5rem;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scrollbar-width: thin;
+          -webkit-overflow-scrolling: touch;
+          padding: 0.15rem 0.2rem;
+        }
+
+        .pill-button {
+          flex: 0 0 auto;
+          min-height: 2.8rem;
+          min-width: 4.2rem;
+          border-radius: 0.95rem;
+          border: 2px solid rgba(120, 53, 15, 0.6);
+          padding: 0.2rem 0.6rem;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .storybook-ground {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          flex-wrap: nowrap;
+          align-items: flex-end;
+          gap: 0.35rem;
+          overflow-x: auto;
+          overflow-y: hidden;
+          -webkit-overflow-scrolling: touch;
+          padding: 0 0.4rem 0.1rem;
+          border-radius: 1rem;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.2) 0%, rgba(255, 255, 255, 0.07) 55%, rgba(255, 255, 255, 0) 100%);
+        }
+
+        .character-emoji {
+          flex: 0 0 auto;
+          font-size: clamp(3rem, 8vw, 4rem);
+          line-height: 1;
+          cursor: pointer;
+          user-select: none;
+          transform: translateY(8%);
+          transition: transform 180ms ease, filter 180ms ease;
+          filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.35));
+        }
+
+        .character-emoji:focus-visible,
+        .character-emoji:hover {
+          transform: translateY(0);
+          filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.45));
+        }
+
+        .emoji-active {
+          filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.85));
         }
       `}</style>
     </main>
