@@ -39,8 +39,8 @@ export default function SwampySoundboardPage() {
                 type="button"
                 className="rounded-2xl bg-white p-3 text-left shadow-sm ring-1 ring-emerald-100 transition-transform duration-150 hover:scale-[1.01]"
               >
-                <div className="mb-2 grid aspect-square place-items-center rounded-xl bg-emerald-100 text-4xl sm:text-5xl">
-                  <span aria-hidden>{animal.emoji}</span>
+                <div className="mb-2 flex aspect-square items-end justify-center rounded-xl bg-emerald-100 text-4xl sm:text-5xl">
+                  <span className="leading-none" aria-hidden>{animal.emoji}</span>
                 </div>
                 <p className="text-center text-base font-semibold text-emerald-800 sm:text-lg">{animal.name}</p>
               </button>
