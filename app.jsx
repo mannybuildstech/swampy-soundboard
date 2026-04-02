@@ -487,16 +487,18 @@ function SwampySoundboardPage() {
           width: 100%;
           height: 100%;
           border: 0;
-          border-radius: 0.85rem;
-          background: rgba(255, 255, 255, 0.16);
+          border-radius: 0;
+          background: transparent;
           font-size: clamp(2.8rem, min(10vw, 14vh), 8rem);
           line-height: 1;
           cursor: pointer;
           user-select: none;
-          display: grid;
-          place-items: center;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          padding-bottom: clamp(0.15rem, 0.7vh, 0.7rem);
           transform: translateY(0);
-          transition: transform 180ms ease, filter 180ms ease, background-color 180ms ease;
+          transition: transform 180ms ease, filter 180ms ease;
           filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.35));
           transform-origin: center center;
         }
@@ -512,7 +514,6 @@ function SwampySoundboardPage() {
         .character-emoji:hover {
           transform: translateY(0);
           filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.45));
-          background: rgba(255, 255, 255, 0.24);
         }
 
         .emoji-sound-active {
