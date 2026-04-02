@@ -128,28 +128,23 @@ function SwampySoundboardPage() {
 
   const sceneThemeMap = {
     beach: {
-      boardBackground: 'linear-gradient(135deg, #93c5fd 0%, #2563eb 100%)',
-      sceneColor: 'linear-gradient(135deg, #1d4ed8 0%, #7dd3fc 100%)',
+      boardBackground: '#3b82f6',
       swatch: 'linear-gradient(135deg, #60a5fa 0%, #0ea5e9 100%)',
     },
     lake: {
-      boardBackground: 'linear-gradient(135deg, #60a5fa 0%, #fde047 100%)',
-      sceneColor: 'linear-gradient(135deg, #2563eb 0%, #facc15 100%)',
+      boardBackground: '#3b82f6',
       swatch: 'linear-gradient(135deg, #3b82f6 0%, #fde047 100%)',
     },
     underwater: {
-      boardBackground: 'linear-gradient(135deg, #0f172a 0%, #1d4ed8 62%, #e2e8f0 100%)',
-      sceneColor: 'linear-gradient(135deg, #020617 0%, #1e3a8a 60%, #f8fafc 100%)',
+      boardBackground: '#1e3a8a',
       swatch: 'linear-gradient(135deg, #1e3a8a 0%, #f8fafc 100%)',
     },
     woods: {
-      boardBackground: 'linear-gradient(135deg, #7c2d12 0%, #14532d 100%)',
-      sceneColor: 'linear-gradient(135deg, #3f1d0d 0%, #14532d 100%)',
+      boardBackground: '#14532d',
       swatch: 'linear-gradient(135deg, #92400e 0%, #166534 100%)',
     },
     default: {
-      boardBackground: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
-      sceneColor: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)',
+      boardBackground: '#f97316',
       swatch: 'linear-gradient(135deg, #f97316 0%, #facc15 100%)',
     },
   };
@@ -303,16 +298,9 @@ function SwampySoundboardPage() {
 
   return (
     <main className="relative h-full min-h-full w-full overflow-hidden bg-white p-0">
-      {currentSceneTheme && (
-        <div
-          className="pointer-events-none absolute inset-0 transition-all duration-700"
-          style={{ background: currentSceneTheme.sceneColor, opacity: 0.42 }}
-        />
-      )}
-
       <div
-        className="relative flex h-full w-full flex-col gap-1 p-2 sm:gap-2 sm:p-3"
-        style={{ background: currentSceneTheme ? currentSceneTheme.boardBackground : '#ffffff' }}
+        className="relative flex h-full w-full flex-col gap-1 p-2 transition-colors duration-700 sm:gap-2 sm:p-3"
+        style={{ backgroundColor: currentSceneTheme ? currentSceneTheme.boardBackground : '#ffffff' }}
       >
         <header className="rounded-2xl bg-white px-2 py-1 text-center shadow-sm sm:py-2">
           <h1 className="text-2xl font-black uppercase tracking-wide text-black sm:text-3xl lg:text-4xl">
@@ -335,7 +323,7 @@ function SwampySoundboardPage() {
                   key={action.id}
                   type="button"
                   onClick={() => triggerOneShot(action)}
-                  className={`pill-button text-white ${isActive ? 'button-sound-active' : ''}`}
+                  className="pill-button text-white"
                 >
                   <p className={`emoji-glyph font-bold ${isActive ? 'emoji-sound-active' : ''}`}>{getEmojiLabel('actions', action.label)}</p>
                 </button>
@@ -346,7 +334,6 @@ function SwampySoundboardPage() {
 
         <section
           className="row-panel row-panel-characters"
-          style={{ background: currentSceneTheme ? currentSceneTheme.sceneColor : 'rgba(255, 255, 255, 0.26)' }}
         >
           <div
             className="storybook-ground"
@@ -359,9 +346,11 @@ function SwampySoundboardPage() {
                   key={character.id}
                   aria-label={character.label}
                   onClick={() => triggerOneShot(character)}
-                  className={`character-emoji ${isActive ? 'emoji-sound-active' : ''}`}
+                  className="character-emoji"
                 >
-                  {getEmojiLabel('characters', character.label)}
+                  <span className={`character-glyph ${isActive ? 'emoji-sound-active' : ''}`}>
+                    {getEmojiLabel('characters', character.label)}
+                  </span>
                 </button>
               );
             })}
@@ -377,7 +366,7 @@ function SwampySoundboardPage() {
                   key={emotion.id}
                   type="button"
                   onClick={() => toggleEmotionMelody(emotion)}
-                  className={`pill-button text-white ${isActive ? 'button-sound-active' : ''}`}
+                  className="pill-button text-white"
                 >
                   <p className={`emoji-glyph ${isActive ? 'emoji-sound-active' : ''}`}>{getEmojiLabel('emotionsMelodies', emotion.label)}</p>
                 </button>
@@ -397,7 +386,7 @@ function SwampySoundboardPage() {
                   key={scene.id}
                   type="button"
                   onClick={() => changeEnvironment(scene)}
-                  className={`pill-button text-white ${isSelected ? 'button-sound-active' : ''}`}
+                  className="pill-button text-white"
                   style={{ background: sceneTheme.swatch, opacity: 0.82 }}
                 >
                   <p className={`emoji-glyph ${isSelected ? 'emoji-sound-active' : ''}`}>{getEmojiLabel('scenes', scene.label)}</p>
@@ -411,34 +400,26 @@ function SwampySoundboardPage() {
       <style>{`
         @keyframes glowPulse {
           0% {
-            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2), 0 0 0 rgba(56, 189, 248, 0.35);
-            transform: scale(1);
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.55)) drop-shadow(0 0 12px rgba(56, 189, 248, 0.5));
           }
           50% {
-            box-shadow: 0 0 18px 4px rgba(255, 255, 255, 0.65), 0 0 30px rgba(56, 189, 248, 0.9);
-            transform: scale(1.03);
+            filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 34px rgba(56, 189, 248, 1));
           }
           100% {
-            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2), 0 0 0 rgba(56, 189, 248, 0.35);
-            transform: scale(1);
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.55)) drop-shadow(0 0 12px rgba(56, 189, 248, 0.5));
           }
         }
 
         @keyframes tiltFloat {
           0% {
-            transform: translateY(0) rotate(-45deg);
+            transform: translateY(0) rotate(-25deg);
           }
           50% {
-            transform: translateY(-8px) rotate(45deg);
+            transform: translateY(-8px) rotate(25deg);
           }
           100% {
-            transform: translateY(0) rotate(-45deg);
+            transform: translateY(0) rotate(-25deg);
           }
-        }
-
-        .button-sound-active {
-          animation: glowPulse 1.2s ease-in-out infinite;
-          filter: brightness(1.12) saturate(1.15);
         }
 
         .row-panel {
@@ -446,8 +427,7 @@ function SwampySoundboardPage() {
           min-height: 0;
           border: 0;
           border-radius: 0;
-          background: rgba(255, 255, 255, 0.26);
-          backdrop-filter: blur(2px);
+          background: transparent;
           padding: 0.35rem 0.2rem;
           display: flex;
           flex-direction: column;
@@ -500,7 +480,7 @@ function SwampySoundboardPage() {
           overflow: hidden;
           padding: 0 0.4rem 0.1rem;
           border-radius: 1rem;
-          background: linear-gradient(to top, rgba(0, 0, 0, 0.2) 0%, rgba(255, 255, 255, 0.07) 55%, rgba(255, 255, 255, 0) 100%);
+          background: transparent;
         }
 
         .character-emoji {
@@ -521,6 +501,13 @@ function SwampySoundboardPage() {
           transform-origin: center center;
         }
 
+        .character-glyph {
+          font-size: clamp(2.8rem, min(10vw, 14vh), 8rem);
+          line-height: 1;
+          display: inline-block;
+          transform-origin: center center;
+        }
+
         .character-emoji:focus-visible,
         .character-emoji:hover {
           transform: translateY(0);
@@ -529,8 +516,8 @@ function SwampySoundboardPage() {
         }
 
         .emoji-sound-active {
-          animation: tiltFloat 1.5s ease-in-out infinite;
-          filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.85));
+          animation: tiltFloat 1.5s ease-in-out infinite, glowPulse 0.95s ease-in-out infinite;
+          will-change: transform, filter;
         }
       `}</style>
     </main>
