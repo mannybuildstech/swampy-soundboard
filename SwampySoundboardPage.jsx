@@ -22,8 +22,8 @@ export default function SwampySoundboardPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-sky-50 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-7xl flex-col gap-4 rounded-[2rem] bg-white p-5 shadow-xl shadow-sky-100 sm:gap-5 sm:p-6 lg:gap-6 lg:p-8">
+    <main className="min-h-dvh bg-sky-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6 lg:p-8">
+      <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-7xl flex-col gap-4 rounded-[2rem] bg-white p-5 shadow-xl shadow-sky-100 sm:gap-5 sm:p-6 lg:gap-6 lg:p-8">
         <header className="rounded-3xl bg-gradient-to-r from-emerald-100 via-lime-100 to-cyan-100 py-4 text-center shadow-sm sm:py-5">
           <h1 className="text-3xl font-black tracking-tight text-emerald-700 sm:text-4xl lg:text-5xl">
             Swampy Soundboard
@@ -66,7 +66,7 @@ export default function SwampySoundboardPage() {
           </div>
         </section>
 
-        <section className="grid flex-1 rounded-3xl bg-blue-100/80 p-4 shadow-md shadow-blue-200 sm:p-5">
+        <section className="rounded-3xl bg-blue-100/80 p-4 shadow-md shadow-blue-200 sm:p-5">
           <div>
             <h2 className="mb-4 text-xl font-bold text-blue-700 sm:text-2xl">Soundscapes</h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
