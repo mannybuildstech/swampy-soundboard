@@ -489,14 +489,18 @@ function SwampySoundboardPage() {
           border: 0;
           border-radius: 0;
           background: transparent;
-          font-size: clamp(2.8rem, min(10vw, 14vh), 8rem);
-          line-height: 1;
+          appearance: none;
+          -webkit-appearance: none;
+          outline: none;
+          box-shadow: none;
+          font-size: clamp(3.8rem, min(16vw, 24vh), 13rem);
+          line-height: 0.92;
           cursor: pointer;
           user-select: none;
-          display: flex;
-          align-items: flex-end;
-          justify-content: center;
-          padding-bottom: clamp(0.15rem, 0.7vh, 0.7rem);
+          display: grid;
+          place-items: end center;
+          padding: 0;
+          overflow: hidden;
           transform: translateY(0);
           transition: transform 180ms ease, filter 180ms ease;
           filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.35));
@@ -504,9 +508,11 @@ function SwampySoundboardPage() {
         }
 
         .character-glyph {
-          font-size: clamp(2.8rem, min(10vw, 14vh), 8rem);
-          line-height: 1;
+          font-size: inherit;
+          line-height: 0.92;
           display: inline-block;
+          vertical-align: bottom;
+          margin: 0;
           transform-origin: center center;
         }
 
