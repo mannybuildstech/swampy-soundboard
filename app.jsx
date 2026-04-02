@@ -297,7 +297,13 @@ function SwampySoundboardPage() {
   };
 
   return (
-    <main className="relative h-full min-h-full w-full overflow-hidden bg-white p-0">
+    <main
+      className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-white p-0"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
       <div
         className="relative flex h-full w-full flex-col gap-1 p-2 transition-colors duration-700 sm:gap-2 sm:p-3"
         style={{ backgroundColor: currentSceneTheme ? currentSceneTheme.boardBackground : '#ffffff' }}
@@ -435,7 +441,7 @@ function SwampySoundboardPage() {
         }
 
         .row-panel-characters {
-          flex: 2.2;
+          flex: 1.4;
           overflow-y: visible;
         }
 
@@ -486,7 +492,7 @@ function SwampySoundboardPage() {
         }
 
         .character-emoji {
-          --character-safe-bottom-padding: clamp(0.22rem, 0.9vh, 0.75rem);
+          --character-safe-bottom-padding: clamp(0.12rem, 0.6vh, 0.5rem);
           --character-glyph-bottom-bleed: 0;
           width: 100%;
           height: 100%;
@@ -497,7 +503,7 @@ function SwampySoundboardPage() {
           -webkit-appearance: none;
           outline: none;
           box-shadow: none;
-          font-size: clamp(3.8rem, min(16vw, 24vh), 13rem);
+          font-size: clamp(3.2rem, min(14vw, 18vh), 10.5rem);
           line-height: 1;
           cursor: pointer;
           user-select: none;
