@@ -436,6 +436,7 @@ function SwampySoundboardPage() {
 
         .row-panel-characters {
           flex: 2.2;
+          overflow-y: visible;
         }
 
         .row-scroller {
@@ -477,15 +478,16 @@ function SwampySoundboardPage() {
           display: grid;
           align-items: stretch;
           gap: 0.35rem;
-          overflow: hidden;
+          overflow-x: hidden;
+          overflow-y: visible;
           padding: 0 0.4rem 0.1rem;
           border-radius: 1rem;
           background: transparent;
         }
 
         .character-emoji {
-          --character-safe-bottom-padding: clamp(0.12rem, 0.5vh, 0.45rem);
-          --character-glyph-bottom-bleed: 0.085em;
+          --character-safe-bottom-padding: clamp(0.22rem, 0.9vh, 0.75rem);
+          --character-glyph-bottom-bleed: 0;
           width: 100%;
           height: 100%;
           border: 0;
@@ -515,7 +517,7 @@ function SwampySoundboardPage() {
           display: inline-block;
           vertical-align: bottom;
           margin: 0;
-          transform: translateY(var(--character-glyph-bottom-bleed));
+          transform: translateY(0);
           transform-origin: center center;
         }
 
