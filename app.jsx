@@ -90,19 +90,38 @@ function SwampySoundboardPage() {
       };
     }
 
-    const normalize = (folder, files = []) =>
-      files.map((fileName) => ({
-        id: `${folder}-${fileName}`,
-        fileName,
-        label: fileName.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' '),
-        src: `./audio-assets/${folder}/${fileName}`,
+    const normalize = (folder, items = []) =>
+      items.map((item) => ({
+        id: `${folder}-${item.id}`,
+        label: item.label,
+        emoji: item.emoji || '✨',
+        image: item.image ? `./audio-assets/${folder}/${item.image}` : null,
+        src: `./audio-assets/${folder}/${item.audio}`,
+      }));
+
+    const normalizeCharacters = (items = []) =>
+      items.map((item) => ({
+        id: `characters-${item.id}`,
+        label: item.label,
+        emoji: item.emoji || '✨',
+        image: item.image ? `./animal-images/${item.image}` : null,
+        src: `./audio-assets/characters/${item.audio}`,
+      }));
+
+    const normalizeScenes = (items = []) =>
+      items.map((item) => ({
+        id: `scenes-${item.id}`,
+        label: item.label,
+        emoji: item.emoji || '✨',
+        image: item.image ? `./scenes/${item.image}` : null,
+        src: `./audio-assets/scenes/${item.audio}`,
       }));
 
     return {
       actions: normalize('actions', manifest.actions),
-      characters: normalize('characters', manifest.characters),
+      characters: normalizeCharacters(manifest.characters),
       emotionsMelodies: normalize('emotions-melodies', manifest['emotions-melodies']),
-      scenes: normalize('scenes', manifest.scenes),
+      scenes: normalizeScenes(manifest.scenes),
     };
   }, [manifest]);
 
@@ -128,76 +147,31 @@ function SwampySoundboardPage() {
 
   const sceneThemeMap = {
     beach: {
-      boardBackground: '#3b82f6',
-      swatch: 'linear-gradient(135deg, #60a5fa 0%, #0ea5e9 100%)',
+      borderColor: '#3b82f6',
     },
-    lake: {
-      boardBackground: '#3b82f6',
-      swatch: 'linear-gradient(135deg, #3b82f6 0%, #fde047 100%)',
+    'oak-forest': {
+      borderColor: '#92400e',
     },
-    underwater: {
-      boardBackground: '#1e3a8a',
-      swatch: 'linear-gradient(135deg, #1e3a8a 0%, #f8fafc 100%)',
+    'pine-forest': {
+      borderColor: '#14532d',
     },
-    woods: {
-      boardBackground: '#14532d',
-      swatch: 'linear-gradient(135deg, #92400e 0%, #166534 100%)',
+    reef: {
+      borderColor: '#1e3a8a',
+    },
+    spring: {
+      borderColor: '#0ea5e9',
     },
     default: {
-      boardBackground: '#f97316',
-      swatch: 'linear-gradient(135deg, #f97316 0%, #facc15 100%)',
+      borderColor: '#f97316',
     },
   };
 
-  const activeSceneLabel = sectionData.scenes.find((scene) => scene.id === activeScene)?.label;
+  const activeSceneItem = sectionData.scenes.find((scene) => scene.id === activeScene);
+  const activeSceneLabel = activeSceneItem?.label;
+  const activeSceneImage = activeSceneItem?.image;
   const currentSceneTheme = activeSceneLabel
-    ? sceneThemeMap[normalizeLabel(activeSceneLabel)] || sceneThemeMap.default
+    ? sceneThemeMap[activeSceneItem.id.replace('scenes-', '')] || sceneThemeMap.default
     : null;
-
-  const emojiMap = {
-    actions: {
-      splash: '💦',
-      running: '🏃',
-      rustling: '🍃',
-      magic: '✨🪄',
-      walking: '🚶',
-      default: '⚡',
-    },
-    characters: {
-      cardinal: '🐦',
-      crane: '🪿',
-      panther: '🐆',
-      alligator: '🐊',
-      coot: '🦆',
-      default: '🐾',
-    },
-    emotionsMelodies: {
-      harmonica: '🎵🎷',
-      bongo: '🥁🔥',
-      piano: '🎹✨',
-      mystery: '🎹🌙',
-      upbeat: '🎶😄',
-      default: '🎶',
-    },
-    scenes: {
-      beach: '🏖️',
-      lake: '🏞️',
-      underwater: '🌊🐠',
-      woods: '🌲🦌',
-      swamp: '🐸🌿',
-      rain: '🌧️',
-      river: '🏞️💧',
-      default: '🌍',
-    },
-  };
-
-  const getEmojiLabel = (category, label) => {
-    const normalized = normalizeLabel(label);
-    const categoryMap = emojiMap[category] || {};
-
-    const match = Object.entries(categoryMap).find(([key]) => key !== 'default' && normalized.includes(key));
-    return match ? match[1] : categoryMap.default || '✨';
-  };
 
   const vibrateTap = () => {
     if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
@@ -302,14 +276,14 @@ function SwampySoundboardPage() {
       style={{
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
-        background: 'linear-gradient(145deg, #5c3a1e 0%, #3d2510 50%, #2a1a0b 100%)',
+        background: '#422A1B',
       }}
     >
       <div
         className="relative flex h-full w-full flex-col gap-1 p-2 sm:gap-2 sm:p-3"
         style={{ backgroundColor: 'transparent' }}
       >
-        <header className="rounded-2xl px-2 py-1 text-center sm:py-2" style={{ backgroundColor: 'rgba(92, 58, 30, 0.6)', border: '2px solid rgba(180, 120, 60, 0.4)' }}>
+        <header className="rounded-2xl px-2 py-1 text-center sm:py-2" style={{ backgroundColor: 'rgba(92, 58, 30, 0.6)', border: `2px solid ${currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(180, 120, 60, 0.4)'}`, transition: 'border-color 400ms ease' }}>
           <h1 className="text-2xl font-black uppercase tracking-wide sm:text-3xl lg:text-4xl" style={{ color: '#d4a054' }}>
             Junior Recording Station
           </h1>
@@ -333,8 +307,12 @@ function SwampySoundboardPage() {
                     type="button"
                     onClick={() => triggerOneShot(action)}
                     className="pill-button text-white"
+                    style={{
+                      borderColor: currentSceneTheme ? currentSceneTheme.borderColor : undefined,
+                      transition: 'border-color 400ms ease',
+                    }}
                   >
-                    <p className={`emoji-glyph font-bold ${isActive ? 'emoji-sound-active' : ''}`}>{getEmojiLabel('actions', action.label)}</p>
+                    <p className={`emoji-glyph font-bold ${isActive ? 'emoji-sound-active' : ''}`}>{action.image ? <img src={action.image} alt={action.label} className="inline-block h-[1em] w-[1em] object-contain" /> : action.emoji}</p>
                   </button>
                 );
               })}
@@ -345,7 +323,14 @@ function SwampySoundboardPage() {
           <div className="flex flex-1 min-h-0 min-w-0 flex-col gap-1 sm:gap-2">
             <section
               className="row-panel story-canvas"
-              style={{ backgroundColor: currentSceneTheme ? currentSceneTheme.boardBackground : '#2d6a4f', transition: 'background-color 700ms ease' }}
+              style={{
+                backgroundColor: '#2d6a4f',
+                backgroundImage: activeSceneImage ? `url(${activeSceneImage})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'bottom center',
+                transition: 'background-image 400ms ease, border-color 400ms ease',
+                borderColor: currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(180, 120, 60, 0.5)',
+              }}
             >
               <div
                 className="storybook-ground"
@@ -361,7 +346,7 @@ function SwampySoundboardPage() {
                       className="character-emoji"
                     >
                       <span className={`character-glyph ${isActive ? 'emoji-sound-active' : ''}`}>
-                        {getEmojiLabel('characters', character.label)}
+                        {character.image ? <img src={character.image} alt={character.label} className="inline-block h-[1em] w-[1em] object-contain" /> : character.emoji}
                       </span>
                     </button>
                   );
@@ -373,24 +358,29 @@ function SwampySoundboardPage() {
               <div className="row-scroller" style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.scenes.length, 1)}, minmax(0, 1fr))` }}>
                 {sectionData.scenes.map((scene) => {
                   const isSelected = activeScene === scene.id;
-                  const sceneLabel = normalizeLabel(scene.label);
-                  const sceneTheme = sceneThemeMap[sceneLabel] || sceneThemeMap.default;
                   return (
                     <button
                       key={scene.id}
                       type="button"
                       onClick={() => changeEnvironment(scene)}
-                      className="pill-button text-white"
-                      style={{ background: sceneTheme.swatch, opacity: 0.82 }}
+                      className={`pill-button text-white ${isSelected ? 'scene-button-active' : ''}`}
+                      style={{
+                        borderColor: currentSceneTheme ? currentSceneTheme.borderColor : undefined,
+                        transition: 'border-color 400ms ease',
+                      }}
                     >
-                      <p className={`emoji-glyph ${isSelected ? 'emoji-sound-active' : ''}`}>{getEmojiLabel('scenes', scene.label)}</p>
+                      <img
+                        src={scene.image}
+                        alt={scene.label}
+                        className={`scene-thumb ${isSelected ? 'scene-thumb-active' : ''}`}
+                      />
                     </button>
                   );
                 })}
               </div>
             </section>
 
-            <section className="stop-section">
+            <section className="stop-section" style={{ borderColor: currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(180, 120, 60, 0.5)', transition: 'border-color 400ms ease' }}>
               <button
                 type="button"
                 onClick={stopAllAudio}
@@ -411,8 +401,12 @@ function SwampySoundboardPage() {
                     type="button"
                     onClick={() => toggleEmotionMelody(emotion)}
                     className="pill-button text-white"
+                    style={{
+                      borderColor: currentSceneTheme ? currentSceneTheme.borderColor : undefined,
+                      transition: 'border-color 400ms ease',
+                    }}
                   >
-                    <p className={`emoji-glyph ${isActive ? 'emoji-sound-active' : ''}`}>{getEmojiLabel('emotionsMelodies', emotion.label)}</p>
+                    <p className={`emoji-glyph ${isActive ? 'emoji-sound-active' : ''}`}>{emotion.image ? <img src={emotion.image} alt={emotion.label} className="inline-block h-[1em] w-[1em] object-contain" /> : emotion.emoji}</p>
                   </button>
                 );
               })}
@@ -443,6 +437,18 @@ function SwampySoundboardPage() {
           }
           100% {
             transform: translateY(0) rotate(-25deg);
+          }
+        }
+
+        @keyframes tiltFloatGentle {
+          0% {
+            transform: translateY(0) rotate(-6deg);
+          }
+          50% {
+            transform: translateY(-2px) rotate(6deg);
+          }
+          100% {
+            transform: translateY(0) rotate(-6deg);
           }
         }
 
@@ -542,7 +548,7 @@ function SwampySoundboardPage() {
           border: 2px solid rgba(180, 120, 60, 0.5);
           padding: 0.2rem 0.6rem;
           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-          background: rgba(60, 35, 15, 0.6);
+          background: #D4B896;
           backdrop-filter: blur(1px);
         }
 
@@ -551,6 +557,20 @@ function SwampySoundboardPage() {
           line-height: 1;
           display: inline-block;
           transform-origin: center center;
+        }
+
+        .scene-thumb {
+          width: clamp(4rem, min(14vw, 14vh), 12rem);
+          height: clamp(4rem, min(14vw, 14vh), 12rem);
+          object-fit: cover;
+          border-radius: 0.5rem;
+          display: inline-block;
+          transform-origin: center center;
+        }
+
+        .scene-thumb-active {
+          animation: tiltFloatGentle 1.5s ease-in-out infinite, glowPulse 0.95s ease-in-out infinite;
+          will-change: transform, filter;
         }
 
         .storybook-ground {

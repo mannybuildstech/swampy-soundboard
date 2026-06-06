@@ -1,28 +1,29 @@
 {
   "actions": [
-    "action-magic.wav",
-    "action-running.wav",
-    "action-rustling.mp3",
-    "action-walking.mp3",
-    "action-water-splash.wav"
+    { "id": "magic", "label": "Magic", "emoji": "✨🪄", "audio": "action-magic.wav", "image": null },
+    { "id": "running", "label": "Running", "emoji": "🏃", "audio": "action-running.wav", "image": null },
+    { "id": "rustling", "label": "Rustling", "emoji": "🍃", "audio": "action-rustling.mp3", "image": null },
+    { "id": "walking", "label": "Walking", "emoji": "🚶", "audio": "action-walking.mp3", "image": null },
+    { "id": "water-splash", "label": "Water Splash", "emoji": "💦", "audio": "action-water-splash.wav", "image": null }
   ],
   "characters": [
-    "char-alligator.wav",
-    "char-cardinal.mp3",
-    "char-coot.mp3",
-    "char-crane.mp3",
-    "char-panther.wav"
+    { "id": "alligator", "label": "Alligator", "emoji": "🐊", "audio": "char-alligator.wav", "image": "alligator.png" },
+    { "id": "cardinal", "label": "Cardinal", "emoji": "🐦", "audio": "char-cardinal.mp3", "image": "cardinal.png" },
+    { "id": "coyote", "label": "Coyote", "emoji": "🐺", "audio": "char-panther.wav", "image": "coyote.png" },
+    { "id": "crane", "label": "Crane", "emoji": "🪿", "audio": "char-crane.mp3", "image": "crane.png" },
+    { "id": "panther", "label": "Panther", "emoji": "🐆", "audio": "char-panther.wav", "image": "panther.png" }
   ],
   "emotions-melodies": [
-    "bongo-buildup.wav",
-    "harmonica-buildup.wav",
-    "harmonica-end.wav",
-    "piano-upbeat.mp3"
+    { "id": "bongo-buildup", "label": "Bongo Buildup", "emoji": "🥁🔥", "audio": "bongo-buildup.wav", "image": null },
+    { "id": "harmonica-buildup", "label": "Harmonica Buildup", "emoji": "🎵🎷", "audio": "harmonica-buildup.wav", "image": null },
+    { "id": "harmonica-end", "label": "Harmonica End", "emoji": "🎵🎷", "audio": "harmonica-end.wav", "image": null },
+    { "id": "piano-upbeat", "label": "Piano Upbeat", "emoji": "🎹✨", "audio": "piano-upbeat.mp3", "image": null }
   ],
   "scenes": [
-    "beach.wav",
-    "lake.wav",
-    "underwater.wav",
-    "woods.wav"
+    { "id": "beach", "label": "Beach", "emoji": "🏖️", "audio": "beach.wav", "image": "beach.png" },
+    { "id": "oak-forest", "label": "Oak Forest", "emoji": "🌳🍂", "audio": "woods.wav", "image": "oak-forest.png" },
+    { "id": "pine-forest", "label": "Pine Forest", "emoji": "🌲🦌", "audio": "woods.wav", "image": "pine-forest.png" },
+    { "id": "reef", "label": "Reef", "emoji": "🪸🐠", "audio": "underwater.wav", "image": "reef.png" },
+    { "id": "spring", "label": "Spring", "emoji": "💧🌿", "audio": "lake.wav", "image": "spring.png" }
   ]
 }
