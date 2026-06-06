@@ -22,6 +22,19 @@
         width: 100%;
         height: 100dvh;
       }
+
+      /* Force landscape layout when device is in portrait */
+      @media (orientation: portrait) and (max-width: 1024px) {
+        #root {
+          transform: rotate(90deg);
+          transform-origin: top left;
+          width: 100dvh;
+          height: 100dvw;
+          position: absolute;
+          top: 0;
+          left: 100%;
+        }
+      }
     </style>
     <script>
       // Request fullscreen + lock orientation on first user interaction
