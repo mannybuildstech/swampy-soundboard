@@ -280,7 +280,7 @@ function SwampySoundboardPage() {
 
   return (
     <main
-      className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden p-0"
+      className="relative h-full w-full overflow-hidden p-0"
       style={{
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
