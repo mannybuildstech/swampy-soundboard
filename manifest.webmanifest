@@ -1,0 +1,9 @@
+{
+  "name": "Swampy Soundboard",
+  "short_name": "Swampy",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "start_url": "./index.html",
+  "background_color": "#422A1B",
+  "theme_color": "#422A1B"
+}

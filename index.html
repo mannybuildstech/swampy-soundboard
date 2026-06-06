@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="screen-orientation" content="landscape" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="./manifest.webmanifest" />
     <title>Swampy Soundboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -21,9 +24,24 @@
       }
     </style>
     <script>
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(function() {});
+      // Request fullscreen + lock orientation on first user interaction
+      function requestLandscape() {
+        var el = document.documentElement;
+        var goFullscreen = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+        if (goFullscreen) {
+          goFullscreen.call(el).then(function() {
+            if (screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock('landscape').catch(function() {});
+            }
+          }).catch(function() {});
+        } else if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(function() {});
+        }
+        document.removeEventListener('click', requestLandscape);
+        document.removeEventListener('touchstart', requestLandscape);
       }
+      document.addEventListener('click', requestLandscape, { once: true });
+      document.addEventListener('touchstart', requestLandscape, { once: true });
     </script>
     <script type="text/babel" data-presets="react" src="./app.jsx"></script>
   </body>
