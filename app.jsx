@@ -1,7 +1,7 @@
 const { useEffect, useMemo, useRef, useState } = React;
 
 function SwampySoundboardPage() {
-  const [activeScene, setActiveScene] = useState(null);
+  const [activeScene, setActiveScene] = useState('scenes-beach');
   const [activeEmotionMelody, setActiveEmotionMelody] = useState(null);
   const [activeOneShots, setActiveOneShots] = useState(() => new Set());
   const [manifest, setManifest] = useState(null);
@@ -144,6 +144,14 @@ function SwampySoundboardPage() {
   }, [sectionData]);
 
   const normalizeLabel = (value) => value.toLowerCase();
+
+  const characterScaleMap = {
+    'characters-alligator': 1.4,
+    'characters-cardinal': 0.7,
+    'characters-coyote': 1.1,
+    'characters-crane': 1.2,
+    'characters-panther': 1.15,
+  };
 
   const sceneThemeMap = {
     beach: {
@@ -330,20 +338,25 @@ function SwampySoundboardPage() {
                 backgroundPosition: 'bottom center',
                 transition: 'background-image 400ms ease, border-color 400ms ease',
                 borderColor: currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(180, 120, 60, 0.5)',
+                position: 'relative',
               }}
             >
+              {/* Darkening overlay */}
+              <div className="scene-darkener" />
               <div
                 className="storybook-ground"
-                style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.characters.length, 1)}, minmax(0, 1fr))` }}
+                style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.characters.length, 1)}, minmax(0, 1fr))`, position: 'relative', zIndex: 1 }}
               >
                 {sectionData.characters.map((character) => {
                   const isActive = activeOneShots.has(character.id);
+                  const scale = characterScaleMap[character.id] || 1;
                   return (
                     <button
                       key={character.id}
                       aria-label={character.label}
                       onClick={() => triggerOneShot(character)}
                       className="character-emoji"
+                      style={{ fontSize: `calc(clamp(3.2rem, min(14vw, 18vh), 10.5rem) * ${scale})` }}
                     >
                       <span className={`character-glyph ${isActive ? 'emoji-sound-active' : ''}`}>
                         {character.image ? <img src={character.image} alt={character.label} className="inline-block h-[1em] w-[1em] object-contain" /> : character.emoji}
@@ -467,9 +480,19 @@ function SwampySoundboardPage() {
         .story-canvas {
           flex: 1;
           overflow-y: visible;
+          overflow-x: hidden;
           border: 3px solid rgba(180, 120, 60, 0.5);
           border-radius: 1.25rem;
           padding: 0.5rem;
+        }
+
+        .scene-darkener {
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background: rgba(0, 0, 0, 0.3);
+          pointer-events: none;
+          z-index: 0;
         }
 
         .row-panel.ambient-row {
@@ -605,10 +628,10 @@ function SwampySoundboardPage() {
           display: grid;
           place-items: end center;
           padding: 0 0 var(--character-safe-bottom-padding);
-          overflow: hidden;
+          overflow: visible;
           transform: translateY(0);
           transition: transform 180ms ease, filter 180ms ease;
-          filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.35));
+          filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.6)) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4));
           transform-origin: center center;
         }
 
@@ -625,7 +648,7 @@ function SwampySoundboardPage() {
         .character-emoji:focus-visible,
         .character-emoji:hover {
           transform: translateY(0);
-          filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.45));
+          filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.7)) drop-shadow(0 8px 12px rgba(0, 0, 0, 0.5));
         }
 
         .emoji-sound-active {
