@@ -479,8 +479,7 @@ function SwampySoundboardPage() {
 
         .story-canvas {
           flex: 1;
-          overflow-y: visible;
-          overflow-x: hidden;
+          overflow: clip;
           border: 3px solid rgba(180, 120, 60, 0.5);
           border-radius: 1.25rem;
           padding: 0.5rem;
@@ -602,8 +601,7 @@ function SwampySoundboardPage() {
           display: grid;
           align-items: stretch;
           gap: 0.35rem;
-          overflow-x: hidden;
-          overflow-y: visible;
+          overflow: visible;
           padding: 0 0.4rem 0.1rem;
           border-radius: 1rem;
           background: transparent;
