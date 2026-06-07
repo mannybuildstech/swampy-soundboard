@@ -549,7 +549,7 @@ function SwampySoundboardPage() {
 
         .row-panel.ambient-row {
           flex: 0 0 auto;
-          height: calc(100% / 6);
+          height: calc(100% / 4);
           border-radius: 1rem;
           background: transparent;
           overflow: hidden;
@@ -680,13 +680,11 @@ function SwampySoundboardPage() {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          border-radius: 0.75rem;
+          border-radius: 1rem;
           display: block;
           transform-origin: center center;
           transition: opacity 400ms ease, filter 400ms ease;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-          border: 4px solid transparent;
-          border-image: url(./pane.png) 30 round;
         }
 
         .scene-img-active {
