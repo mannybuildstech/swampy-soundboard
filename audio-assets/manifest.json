@@ -22,10 +22,10 @@
     { "id": "thunderstorm-sad", "label": "Thunderstorm Sad", "emoji": "⛈️😢", "audio": "thunderstorm-sad.wav", "image": null }
   ],
   "scenes": [
-    { "id": "beach", "label": "Beach", "emoji": "🏖️", "audio": "beach.wav", "image": "beach.png" },
-    { "id": "oak-forest", "label": "Oak Forest", "emoji": "🌳🍂", "audio": "woods.wav", "image": "oak-forest.png" },
-    { "id": "pine-forest", "label": "Pine Forest", "emoji": "🌲🦌", "audio": "woods.wav", "image": "pine-forest.png" },
-    { "id": "reef", "label": "Reef", "emoji": "🪸🐠", "audio": "underwater.wav", "image": "reef.png" },
-    { "id": "spring", "label": "Spring", "emoji": "💧🌿", "audio": "lake.wav", "image": "spring.png" }
+    { "id": "beach", "label": "Beach", "emoji": "🏖️", "audio": "beach.mp3", "image": "beach.png" },
+    { "id": "oak-forest", "label": "Oak Forest", "emoji": "🌳🍂", "audio": "woods.mp3", "image": "oak-forest.png" },
+    { "id": "pine-forest", "label": "Pine Forest", "emoji": "🌲🦌", "audio": "woods.mp3", "image": "pine-forest.png" },
+    { "id": "reef", "label": "Reef", "emoji": "🪸🐠", "audio": "underwater.mp3", "image": "reef.png" },
+    { "id": "spring", "label": "Spring", "emoji": "💧🌿", "audio": "lake.mp3", "image": "spring.png" }
   ]
 }

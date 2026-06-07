@@ -295,12 +295,44 @@ function SwampySoundboardPage() {
   };
 
   const storyGroundRef = useRef(null);
+  const stageRef = useRef(null);
+  const touchRef = useRef({ startX: 0, startY: 0, scrollLeft: 0, isSwiping: false });
 
   const scrollCharacters = (direction) => {
     if (storyGroundRef.current) {
       const scrollAmount = storyGroundRef.current.offsetWidth * 0.6;
       storyGroundRef.current.scrollBy({ left: direction === 'right' ? scrollAmount : -scrollAmount, behavior: 'smooth' });
     }
+  };
+
+  const handleStageTouchStart = (e) => {
+    if (!storyGroundRef.current) return;
+    const touch = e.touches[0];
+    touchRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      scrollLeft: storyGroundRef.current.scrollLeft,
+      isSwiping: false,
+    };
+  };
+
+  const handleStageTouchMove = (e) => {
+    if (!storyGroundRef.current) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchRef.current.startX;
+    const deltaY = touch.clientY - touchRef.current.startY;
+
+    // Only hijack horizontal swipes (avoid interfering with vertical scroll)
+    if (!touchRef.current.isSwiping) {
+      if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        touchRef.current.isSwiping = true;
+      } else {
+        return;
+      }
+    }
+
+    e.preventDefault();
+    storyGroundRef.current.scrollLeft = touchRef.current.scrollLeft - deltaX;
   };
 
   return (
@@ -358,7 +390,10 @@ function SwampySoundboardPage() {
           {/* CENTER - Characters + Scenes */}
           <div className="flex flex-1 min-h-0 min-w-0 flex-col gap-1 sm:gap-2">
             <section
+              ref={stageRef}
               className="row-panel story-canvas"
+              onTouchStart={handleStageTouchStart}
+              onTouchMove={handleStageTouchMove}
               style={{
                 backgroundColor: '#2d6a4f',
                 backgroundImage: activeSceneImage ? `url(${activeSceneImage})` : 'none',
