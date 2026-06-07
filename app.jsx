@@ -63,7 +63,28 @@ function SwampySoundboardPage() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        stopAllAudio();
+        // Pause all audio but preserve scene selection
+        if (sceneAudioRef.current) {
+          sceneAudioRef.current.pause();
+        }
+        if (emotionAudioRef.current) {
+          emotionAudioRef.current.pause();
+          emotionAudioRef.current = null;
+        }
+        activeOneShotInstancesRef.current.forEach((instances) => {
+          instances.forEach((audio) => {
+            audio.pause();
+            audio.currentTime = 0;
+          });
+        });
+        activeOneShotInstancesRef.current.clear();
+        setActiveEmotionMelody(null);
+        setActiveOneShots(new Set());
+      } else {
+        // Resume scene audio when coming back
+        if (sceneAudioRef.current) {
+          sceneAudioRef.current.play().catch(() => {});
+        }
       }
     };
 
@@ -288,14 +309,14 @@ function SwampySoundboardPage() {
       style={{
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
-        background: '#422A1B',
+        background: '#422A1B url(./back-panel.png) center center / cover no-repeat',
       }}
     >
       <div
         className="relative flex h-full w-full flex-col gap-1 p-2 sm:gap-2 sm:p-3"
         style={{ backgroundColor: 'transparent' }}
       >
-        <header className="top-bar" style={{ borderColor: currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(180, 120, 60, 0.4)', transition: 'border-color 400ms ease' }}>
+        <header className="top-bar">
           <h1 className="top-bar-title" style={{ color: '#d4a054' }}>
             Junior Recording Station
           </h1>
@@ -326,10 +347,6 @@ function SwampySoundboardPage() {
                     type="button"
                     onClick={() => triggerOneShot(action)}
                     className="pill-button text-white"
-                    style={{
-                      borderColor: currentSceneTheme ? currentSceneTheme.borderColor : undefined,
-                      transition: 'border-color 400ms ease',
-                    }}
                   >
                     <p className={`emoji-glyph font-bold ${isActive ? 'emoji-sound-active' : ''}`}>{action.image ? <img src={action.image} alt={action.label} className="inline-block h-[1em] w-[1em] object-contain" /> : action.emoji}</p>
                   </button>
@@ -419,10 +436,6 @@ function SwampySoundboardPage() {
                     type="button"
                     onClick={() => toggleEmotionMelody(emotion)}
                     className="pill-button text-white"
-                    style={{
-                      borderColor: currentSceneTheme ? currentSceneTheme.borderColor : undefined,
-                      transition: 'border-color 400ms ease',
-                    }}
                   >
                     <p className={`emoji-glyph ${isActive ? 'emoji-sound-active' : ''}`}>{emotion.image ? <img src={emotion.image} alt={emotion.label} className="inline-block h-[1em] w-[1em] object-contain" /> : emotion.emoji}</p>
                   </button>
@@ -512,8 +525,8 @@ function SwampySoundboardPage() {
           gap: 0.75rem;
           border-radius: 1rem;
           padding: 0.35rem 0.75rem;
-          background: rgba(92, 58, 30, 0.6);
-          border: 2px solid rgba(180, 120, 60, 0.4);
+          background: transparent;
+          border: none;
         }
 
         .top-bar-title {
@@ -584,11 +597,10 @@ function SwampySoundboardPage() {
           place-items: center;
           text-align: center;
           border-radius: 0.95rem;
-          border: 2px solid rgba(180, 120, 60, 0.5);
+          border: none;
           padding: 0.2rem 0.6rem;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-          background: #D4B896;
-          backdrop-filter: blur(1px);
+          box-shadow: none;
+          background: transparent;
         }
 
         .emoji-glyph {
@@ -630,6 +642,7 @@ function SwampySoundboardPage() {
           display: block;
           transform-origin: center center;
           transition: opacity 400ms ease, filter 400ms ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
         .scene-img-active {
