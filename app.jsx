@@ -255,16 +255,11 @@ function SwampySoundboardPage() {
   };
 
   const changeEnvironment = (scene) => {
-    vibrateTap();
-
     if (activeScene === scene.id) {
-      if (sceneAudioRef.current) {
-        sceneAudioRef.current.pause();
-        sceneAudioRef.current = null;
-      }
-      setActiveScene(null);
       return;
     }
+
+    vibrateTap();
 
     if (sceneAudioRef.current) {
       sceneAudioRef.current.pause();
@@ -276,6 +271,15 @@ function SwampySoundboardPage() {
 
     sceneAudioRef.current = nextAudio;
     setActiveScene(scene.id);
+  };
+
+  const storyGroundRef = useRef(null);
+
+  const scrollCharacters = (direction) => {
+    if (storyGroundRef.current) {
+      const scrollAmount = storyGroundRef.current.offsetWidth * 0.6;
+      storyGroundRef.current.scrollBy({ left: direction === 'right' ? scrollAmount : -scrollAmount, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -351,11 +355,12 @@ function SwampySoundboardPage() {
               {/* Darkening overlay */}
               <div className="scene-darkener" />
               <div className="storybook-ground-wrapper" style={{ position: 'relative', zIndex: 1 }}>
-                <div className="scroll-arrow scroll-arrow-left" aria-hidden>‹</div>
-                <div className="scroll-arrow scroll-arrow-right" aria-hidden>›</div>
+                <button className="scroll-arrow scroll-arrow-left" aria-label="Scroll left" onClick={() => scrollCharacters('left')}>‹</button>
+                <button className="scroll-arrow scroll-arrow-right" aria-label="Scroll right" onClick={() => scrollCharacters('right')}>›</button>
                 <div
+                  ref={storyGroundRef}
                   className="storybook-ground"
-                  style={{ gridTemplateColumns: `repeat(${sectionData.characters.length}, minmax(clamp(4rem, 15vw, 9rem), 1fr))` }}
+                  style={{ gridTemplateColumns: `repeat(${sectionData.characters.length}, 25%)` }}
                 >
                   {sectionData.characters.map((character) => {
                     const isActive = activeOneShots.has(character.id);
@@ -368,7 +373,7 @@ function SwampySoundboardPage() {
                         className={`character-emoji ${isActive ? 'character-active' : ''}`}
                         style={{ fontSize: `calc(clamp(4rem, min(18vw, 22vh), 13rem) * ${scale})` }}
                       >
-                        <span className={`character-glyph ${isActive ? 'emoji-sound-active' : ''}`}>
+                        <span className={`character-glyph ${isActive ? 'character-glyph-active' : ''}`}>
                           {character.image ? <img src={character.image} alt={character.label} className="inline-block h-[1em] w-[1em] object-contain" /> : character.emoji}
                         </span>
                       </button>
@@ -675,11 +680,19 @@ function SwampySoundboardPage() {
           transform: translateY(-50%);
           font-size: 2rem;
           font-weight: bold;
-          color: rgba(255, 255, 255, 0.6);
-          pointer-events: none;
+          color: rgba(255, 255, 255, 0.8);
           z-index: 2;
           text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
           animation: arrowPulse 2s ease-in-out infinite;
+          background: rgba(0, 0, 0, 0.3);
+          border: none;
+          border-radius: 50%;
+          width: 2.5rem;
+          height: 2.5rem;
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+          padding: 0;
         }
 
         .scroll-arrow-left {
@@ -740,6 +753,11 @@ function SwampySoundboardPage() {
         .character-emoji.character-active {
           transform: translateY(0) scale(1.25);
           filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.7)) drop-shadow(0 8px 12px rgba(0, 0, 0, 0.5));
+        }
+
+        .character-glyph-active {
+          animation: tiltFloat 1.5s ease-in-out infinite, glowPulse 0.95s ease-in-out infinite;
+          will-change: transform, filter;
         }
 
         .emoji-sound-active {
