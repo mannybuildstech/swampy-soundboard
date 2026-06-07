@@ -309,7 +309,7 @@ function SwampySoundboardPage() {
       style={{
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
-        background: '#2a1a0e',
+        background: '#1a1a1a',
       }}
     >
       <div
@@ -516,7 +516,7 @@ function SwampySoundboardPage() {
           flex: 0 0 auto;
           height: calc(100% / 6);
           border-radius: 1rem;
-          background: url(./radio-speaker-fabric.png) center center / cover no-repeat;
+          background: transparent;
           overflow: hidden;
         }
 
@@ -527,19 +527,19 @@ function SwampySoundboardPage() {
           justify-content: center;
           gap: 0.75rem;
           border-radius: 1rem;
-          padding: 0.35rem 0.75rem;
+          padding: 0.15rem 0.75rem;
           background: transparent;
           border: none;
           overflow: hidden;
         }
 
         .top-bar-title {
-          font-size: clamp(1rem, 3.5vw, 1.75rem);
+          font-size: clamp(0.7rem, 2.5vw, 1.25rem);
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: 0.04em;
           text-align: center;
-          line-height: 1.1;
+          line-height: 1;
         }
 
         .stop-button {
@@ -574,8 +574,8 @@ function SwampySoundboardPage() {
           min-width: 15vw;
           min-height: 0;
           border: 0;
-          border-radius: 1rem;
-          background: url(./pane.png) center center / cover no-repeat;
+          border-radius: 0;
+          background: transparent;
           padding: 0.2rem;
           display: flex;
           flex-direction: column;
@@ -604,13 +604,16 @@ function SwampySoundboardPage() {
           border: none;
           padding: 0.2rem 0.6rem;
           box-shadow: none;
-          background: transparent;
+          background: #2e2e2e;
         }
 
         .emoji-glyph {
-          font-size: clamp(2rem, min(7vw, 7vh), 6rem);
+          font-size: clamp(1.2rem, min(5vw, 5vh), 4rem);
           line-height: 1;
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          white-space: nowrap;
           transform-origin: center center;
         }
 
@@ -647,6 +650,8 @@ function SwampySoundboardPage() {
           transform-origin: center center;
           transition: opacity 400ms ease, filter 400ms ease;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+          border: 4px solid transparent;
+          border-image: url(./pane.png) 30 round;
         }
 
         .scene-img-active {
