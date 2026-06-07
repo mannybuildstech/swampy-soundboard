@@ -309,7 +309,7 @@ function SwampySoundboardPage() {
       style={{
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
-        background: '#422A1B url(./back-panel.png) center center / cover no-repeat',
+        background: '#2a1a0e',
       }}
     >
       <div
@@ -515,6 +515,9 @@ function SwampySoundboardPage() {
         .row-panel.ambient-row {
           flex: 0 0 auto;
           height: calc(100% / 6);
+          border-radius: 1rem;
+          background: url(./radio-speaker-fabric.png) center center / cover no-repeat;
+          overflow: hidden;
         }
 
         .top-bar {
@@ -527,6 +530,7 @@ function SwampySoundboardPage() {
           padding: 0.35rem 0.75rem;
           background: transparent;
           border: none;
+          overflow: hidden;
         }
 
         .top-bar-title {
@@ -570,8 +574,8 @@ function SwampySoundboardPage() {
           min-width: 15vw;
           min-height: 0;
           border: 0;
-          border-radius: 0;
-          background: transparent;
+          border-radius: 1rem;
+          background: url(./pane.png) center center / cover no-repeat;
           padding: 0.2rem;
           display: flex;
           flex-direction: column;
@@ -651,7 +655,7 @@ function SwampySoundboardPage() {
         }
 
         .scene-img-dimmed {
-          opacity: 0.4;
+          filter: brightness(0.35);
         }
 
         .storybook-ground-wrapper {
