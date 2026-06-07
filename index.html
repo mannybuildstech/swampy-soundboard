@@ -50,17 +50,9 @@
       }
     </style>
     <script>
-      // Request fullscreen + lock orientation on first user interaction
+      // Lock orientation on first user interaction (no fullscreen)
       function requestLandscape() {
-        var el = document.documentElement;
-        var goFullscreen = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-        if (goFullscreen) {
-          goFullscreen.call(el).then(function() {
-            if (screen.orientation && screen.orientation.lock) {
-              screen.orientation.lock('landscape').catch(function() {});
-            }
-          }).catch(function() {});
-        } else if (screen.orientation && screen.orientation.lock) {
+        if (screen.orientation && screen.orientation.lock) {
           screen.orientation.lock('landscape').catch(function() {});
         }
         document.removeEventListener('click', requestLandscape);

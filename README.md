@@ -49,10 +49,18 @@ panter, coyote
 - decide on final action and melody roster (consider facial expressions to denote emotions)
 
 
+Asset TODOs (actions):
+- add weather effects: wind, thunderstorm/rain, lightning crack
+
 Code TODO:
-- audio recording
+- audio recording (mic + soundboard mix)
+  - migrate playback to Web Audio API (AudioBuffer + AudioBufferSourceNode for one-shots)
+  - mic capture via getUserMedia with echoCancellation: true
+  - route mic + clean soundboard into MediaStreamDestination → MediaRecorder
+  - duck speaker volume (~30%) during recording to reduce mic bleed
+  - voice activity detection (AnalyserNode RMS) to auto-duck sfx when narrating
+  - export recording as downloadable blob
 - tap again to mute? or tap again to create a new one?
-- dynamic volume adjusting: everything slightly lowers when person narrates
 - create an "overflow system" so that you can select more than what is shown on the screen (this can come later)
 
 

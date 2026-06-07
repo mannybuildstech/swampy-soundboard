@@ -291,10 +291,17 @@ function SwampySoundboardPage() {
         className="relative flex h-full w-full flex-col gap-1 p-2 sm:gap-2 sm:p-3"
         style={{ backgroundColor: 'transparent' }}
       >
-        <header className="rounded-2xl px-2 py-1 text-center sm:py-2" style={{ backgroundColor: 'rgba(92, 58, 30, 0.6)', border: `2px solid ${currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(180, 120, 60, 0.4)'}`, transition: 'border-color 400ms ease' }}>
-          <h1 className="text-2xl font-black uppercase tracking-wide sm:text-3xl lg:text-4xl" style={{ color: '#d4a054' }}>
+        <header className="top-bar" style={{ borderColor: currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(180, 120, 60, 0.4)', transition: 'border-color 400ms ease' }}>
+          <h1 className="top-bar-title" style={{ color: '#d4a054' }}>
             Junior Recording Station
           </h1>
+          <button
+            type="button"
+            onClick={stopAllAudio}
+            className="stop-button"
+            aria-label="Stop all audio"
+            style={{ borderColor: currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(120, 53, 15, 0.4)', transition: 'border-color 400ms ease' }}
+          />
         </header>
 
         {loadError && (
@@ -304,7 +311,7 @@ function SwampySoundboardPage() {
         )}
 
         <div className="flex flex-1 min-h-0 gap-1 sm:gap-2">
-          {/* LEFT COLUMN - Actions (left thumb) */}
+          {/* LEFT COLUMN - Actions */}
           <aside className="col-panel">
             <div className="col-scroller" style={{ gridTemplateRows: `repeat(${Math.max(sectionData.actions.length, 1)}, minmax(0, 1fr))` }}>
               {sectionData.actions.map((action) => {
@@ -343,49 +350,50 @@ function SwampySoundboardPage() {
             >
               {/* Darkening overlay */}
               <div className="scene-darkener" />
-              <div
-                className="storybook-ground"
-                style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.characters.length, 1)}, minmax(0, 1fr))`, position: 'relative', zIndex: 1 }}
-              >
-                {sectionData.characters.map((character) => {
-                  const isActive = activeOneShots.has(character.id);
-                  const scale = characterScaleMap[character.id] || 1;
-                  return (
-                    <button
-                      key={character.id}
-                      aria-label={character.label}
-                      onClick={() => triggerOneShot(character)}
-                      className="character-emoji"
-                      style={{ fontSize: `calc(clamp(3.2rem, min(14vw, 18vh), 10.5rem) * ${scale})` }}
-                    >
-                      <span className={`character-glyph ${isActive ? 'emoji-sound-active' : ''}`}>
-                        {character.image ? <img src={character.image} alt={character.label} className="inline-block h-[1em] w-[1em] object-contain" /> : character.emoji}
-                      </span>
-                    </button>
-                  );
-                })}
+              <div className="storybook-ground-wrapper" style={{ position: 'relative', zIndex: 1 }}>
+                <div className="scroll-arrow scroll-arrow-left" aria-hidden>‹</div>
+                <div className="scroll-arrow scroll-arrow-right" aria-hidden>›</div>
+                <div
+                  className="storybook-ground"
+                  style={{ gridTemplateColumns: `repeat(${sectionData.characters.length}, minmax(clamp(4rem, 15vw, 9rem), 1fr))` }}
+                >
+                  {sectionData.characters.map((character) => {
+                    const isActive = activeOneShots.has(character.id);
+                    const scale = characterScaleMap[character.id] || 1;
+                    return (
+                      <button
+                        key={character.id}
+                        aria-label={character.label}
+                        onClick={() => triggerOneShot(character)}
+                        className={`character-emoji ${isActive ? 'character-active' : ''}`}
+                        style={{ fontSize: `calc(clamp(4rem, min(18vw, 22vh), 13rem) * ${scale})` }}
+                      >
+                        <span className={`character-glyph ${isActive ? 'emoji-sound-active' : ''}`}>
+                          {character.image ? <img src={character.image} alt={character.label} className="inline-block h-[1em] w-[1em] object-contain" /> : character.emoji}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </section>
 
             <section className="row-panel ambient-row">
-              <div className="row-scroller" style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.scenes.length, 1)}, minmax(0, 1fr))` }}>
+              <div className="scene-row" style={{ gridTemplateColumns: `repeat(${Math.max(sectionData.scenes.length, 1)}, minmax(0, 1fr))` }}>
                 {sectionData.scenes.map((scene) => {
                   const isSelected = activeScene === scene.id;
+                  const isDimmed = activeScene && !isSelected;
                   return (
                     <button
                       key={scene.id}
                       type="button"
                       onClick={() => changeEnvironment(scene)}
-                      className={`pill-button text-white ${isSelected ? 'scene-button-active' : ''}`}
-                      style={{
-                        borderColor: currentSceneTheme ? currentSceneTheme.borderColor : undefined,
-                        transition: 'border-color 400ms ease',
-                      }}
+                      className="scene-button"
                     >
                       <img
                         src={scene.image}
                         alt={scene.label}
-                        className={`scene-thumb ${isSelected ? 'scene-thumb-active' : ''}`}
+                        className={`scene-img ${isSelected ? 'scene-img-active' : ''} ${isDimmed ? 'scene-img-dimmed' : ''}`}
                       />
                     </button>
                   );
@@ -393,14 +401,6 @@ function SwampySoundboardPage() {
               </div>
             </section>
 
-            <section className="stop-section" style={{ borderColor: currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(180, 120, 60, 0.5)', transition: 'border-color 400ms ease' }}>
-              <button
-                type="button"
-                onClick={stopAllAudio}
-                className="stop-button"
-                aria-label="Stop all audio"
-              />
-            </section>
           </div>
 
           {/* RIGHT COLUMN - Melodies (right thumb) */}
@@ -496,22 +496,34 @@ function SwampySoundboardPage() {
 
         .row-panel.ambient-row {
           flex: 0 0 auto;
-          height: calc(100% / 5);
+          height: calc(100% / 6);
         }
 
-        .stop-section {
-          flex: 0 0 auto;
-          display: grid;
-          place-items: center;
-          padding: 0.5rem 0;
-          border: 3px solid rgba(180, 120, 60, 0.5);
-          border-radius: 1.25rem;
-          background: rgba(92, 58, 30, 0.4);
+        .top-bar {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+          border-radius: 1rem;
+          padding: 0.35rem 0.75rem;
+          background: rgba(92, 58, 30, 0.6);
+          border: 2px solid rgba(180, 120, 60, 0.4);
+        }
+
+        .top-bar-title {
+          font-size: clamp(1rem, 3.5vw, 1.75rem);
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          text-align: center;
+          line-height: 1.1;
         }
 
         .stop-button {
-          width: 3rem;
-          height: 3rem;
+          width: 2.25rem;
+          height: 2.25rem;
+          flex-shrink: 0;
           border-radius: 50%;
           background: #dc2626;
           border: 3px solid rgba(120, 53, 15, 0.4);
@@ -581,18 +593,56 @@ function SwampySoundboardPage() {
           transform-origin: center center;
         }
 
-        .scene-thumb {
-          width: clamp(4rem, min(14vw, 14vh), 12rem);
-          height: clamp(4rem, min(14vw, 14vh), 12rem);
-          object-fit: cover;
-          border-radius: 0.5rem;
-          display: inline-block;
-          transform-origin: center center;
+        .scene-row {
+          flex: 1;
+          min-height: 0;
+          display: grid;
+          align-items: stretch;
+          gap: 0.35rem;
+          overflow: hidden;
         }
 
-        .scene-thumb-active {
-          animation: tiltFloatGentle 1.5s ease-in-out infinite, glowPulse 0.95s ease-in-out infinite;
-          will-change: transform, filter;
+        .scene-button {
+          width: 100%;
+          height: 100%;
+          min-height: 0;
+          min-width: 0;
+          display: grid;
+          place-items: center;
+          background: transparent;
+          border: none;
+          border-radius: 0.75rem;
+          padding: 0;
+          cursor: pointer;
+          overflow: hidden;
+        }
+
+        .scene-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 0.75rem;
+          display: block;
+          transform-origin: center center;
+          transition: opacity 400ms ease, filter 400ms ease;
+        }
+
+        .scene-img-active {
+          animation: glowPulse 0.95s ease-in-out infinite;
+          will-change: filter;
+        }
+
+        .scene-img-dimmed {
+          opacity: 0.4;
+        }
+
+        .storybook-ground-wrapper {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          align-items: stretch;
+          border-radius: 1rem;
+          overflow: hidden;
         }
 
         .storybook-ground {
@@ -601,10 +651,48 @@ function SwampySoundboardPage() {
           display: grid;
           align-items: stretch;
           gap: 0.35rem;
-          overflow: visible;
+          overflow-x: auto;
+          overflow-y: hidden;
           padding: 0 0.4rem 0.1rem;
           border-radius: 1rem;
           background: transparent;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+
+        .storybook-ground::-webkit-scrollbar {
+          display: none;
+        }
+
+        .storybook-ground > * {
+          scroll-snap-align: center;
+        }
+
+        .scroll-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 2rem;
+          font-weight: bold;
+          color: rgba(255, 255, 255, 0.6);
+          pointer-events: none;
+          z-index: 2;
+          text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+          animation: arrowPulse 2s ease-in-out infinite;
+        }
+
+        .scroll-arrow-left {
+          left: 0.25rem;
+        }
+
+        .scroll-arrow-right {
+          right: 0.25rem;
+        }
+
+        @keyframes arrowPulse {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.9; }
         }
 
         .character-emoji {
@@ -619,7 +707,7 @@ function SwampySoundboardPage() {
           -webkit-appearance: none;
           outline: none;
           box-shadow: none;
-          font-size: clamp(3.2rem, min(14vw, 18vh), 10.5rem);
+          font-size: clamp(4rem, min(18vw, 22vh), 13rem);
           line-height: 1;
           cursor: pointer;
           user-select: none;
@@ -627,10 +715,10 @@ function SwampySoundboardPage() {
           place-items: end center;
           padding: 0 0 var(--character-safe-bottom-padding);
           overflow: visible;
-          transform: translateY(0);
-          transition: transform 180ms ease, filter 180ms ease;
+          transform: translateY(0) scale(1);
+          transition: transform 300ms ease, filter 300ms ease;
           filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.6)) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4));
-          transform-origin: center center;
+          transform-origin: center bottom;
         }
 
         .character-glyph {
@@ -645,7 +733,12 @@ function SwampySoundboardPage() {
 
         .character-emoji:focus-visible,
         .character-emoji:hover {
-          transform: translateY(0);
+          transform: translateY(0) scale(1);
+          filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.7)) drop-shadow(0 8px 12px rgba(0, 0, 0, 0.5));
+        }
+
+        .character-emoji.character-active {
+          transform: translateY(0) scale(1.25);
           filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.7)) drop-shadow(0 8px 12px rgba(0, 0, 0, 0.5));
         }
 

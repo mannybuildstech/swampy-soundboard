@@ -1,23 +1,25 @@
 {
   "actions": [
-    { "id": "magic", "label": "Magic", "emoji": "✨🪄", "audio": "action-magic.wav", "image": null },
+    { "id": "magic", "label": "Magic", "emoji": "✨", "audio": "magic-sparkle.wav", "image": null },
     { "id": "running", "label": "Running", "emoji": "🏃", "audio": "action-running.wav", "image": null },
-    { "id": "rustling", "label": "Rustling", "emoji": "🍃", "audio": "action-rustling.mp3", "image": null },
-    { "id": "walking", "label": "Walking", "emoji": "🚶", "audio": "action-walking.mp3", "image": null },
+    { "id": "harmonica-end", "label": "Harmonica End", "emoji": "😌🌈", "audio": "harmonica-end.wav", "image": null },
+    { "id": "wind", "label": "Wind", "emoji": "🌬️", "audio": "wind.wav", "image": null },
     { "id": "water-splash", "label": "Water Splash", "emoji": "💦", "audio": "action-water-splash.wav", "image": null }
   ],
   "characters": [
-    { "id": "alligator", "label": "Alligator", "emoji": "🐊", "audio": "char-alligator.mp3", "image": "alligator.png" },
+    { "id": "alligator", "label": "Alligator", "emoji": "🐊", "audio": "char-alligator.mp3", "image": "alligator-2.png" },
     { "id": "cardinal", "label": "Cardinal", "emoji": "🐦", "audio": "char-cardinal.mp3", "image": "cardinal.png" },
     { "id": "coyote", "label": "Coyote", "emoji": "🐺", "audio": "coyote-sound.mp3", "image": "coyote.png" },
     { "id": "crane", "label": "Crane", "emoji": "🪿", "audio": "crane-sound.mp3", "image": "crane.png" },
+    { "id": "dolphin", "label": "Dolphin", "emoji": "🐬", "audio": "dolphin-sound.mp3", "image": "dolphin.png" },
+    { "id": "longnose", "label": "Longnose Gar", "emoji": "🐟", "audio": "longnose-bubbles.mp3", "image": "longnose.png" },
     { "id": "panther", "label": "Panther", "emoji": "🐆", "audio": "char-panther.mp3", "image": "panther.png" }
   ],
   "emotions-melodies": [
     { "id": "bongo-buildup", "label": "Bongo Buildup", "emoji": "🥁🔥", "audio": "bongo-buildup.wav", "image": null },
     { "id": "harmonica-buildup", "label": "Harmonica Buildup", "emoji": "🎵🎷", "audio": "harmonica-buildup.wav", "image": null },
-    { "id": "harmonica-end", "label": "Harmonica End", "emoji": "🎵🎷", "audio": "harmonica-end.wav", "image": null },
-    { "id": "piano-upbeat", "label": "Piano Upbeat", "emoji": "🎹✨", "audio": "piano-upbeat.wav", "image": null }
+    { "id": "piano-upbeat", "label": "Piano Upbeat", "emoji": "🎹😱", "audio": "piano-upbeat.wav", "image": null },
+    { "id": "thunderstorm-sad", "label": "Thunderstorm Sad", "emoji": "⛈️😢", "audio": "thunderstorm-sad.wav", "image": null }
   ],
   "scenes": [
     { "id": "beach", "label": "Beach", "emoji": "🏖️", "audio": "beach.wav", "image": "beach.png" },
