@@ -1,4 +1,4 @@
-const { useEffect, useMemo, useRef, useState } = React;
+const { useEffect, useMemo, useRef, useState, useCallback } = React;
 
 function SwampySoundboardPage() {
   const [activeScene, setActiveScene] = useState('scenes-beach');
@@ -6,10 +6,286 @@ function SwampySoundboardPage() {
   const [activeOneShots, setActiveOneShots] = useState(() => new Set());
   const [manifest, setManifest] = useState(null);
   const [loadError, setLoadError] = useState('');
+
+  // Recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedBlob, setRecordedBlob] = useState(null);
+  const [recordingUrl, setRecordingUrl] = useState(null);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const [recordingSupported, setRecordingSupported] = useState(true);
+
   const sceneAudioRef = useRef(null);
   const emotionAudioRef = useRef(null);
   const audioCacheRef = useRef(new Map());
   const activeOneShotInstancesRef = useRef(new Map());
+
+  // Web Audio API refs for recording
+  const audioContextRef = useRef(null);
+  const speakerGainRef = useRef(null);
+  const recordingGainRef = useRef(null);
+  const micGainRef = useRef(null);
+  const mediaStreamDestRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const micStreamRef = useRef(null);
+  const micSourceRef = useRef(null);
+  const recordingChunksRef = useRef([]);
+  const previewAudioRef = useRef(null);
+
+  // Check MediaRecorder support
+  useEffect(() => {
+    if (typeof MediaRecorder === 'undefined') {
+      setRecordingSupported(false);
+    }
+  }, []);
+
+  // Initialize Web Audio API context (called lazily on first interaction)
+  const ensureAudioContext = useCallback(() => {
+    if (audioContextRef.current) {
+      if (audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+      return audioContextRef.current;
+    }
+
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Speaker gain: ducked during recording to reduce mic bleed
+    const speakerGain = ctx.createGain();
+    speakerGain.gain.value = 1.0;
+    speakerGain.connect(ctx.destination);
+
+    // Recording gain: lower soundboard volume in the mix so voice is clear
+    const recordingGain = ctx.createGain();
+    recordingGain.gain.value = 0.4;
+
+    // MediaStream destination for MediaRecorder
+    const mediaStreamDest = ctx.createMediaStreamDestination();
+    recordingGain.connect(mediaStreamDest);
+
+    audioContextRef.current = ctx;
+    speakerGainRef.current = speakerGain;
+    recordingGainRef.current = recordingGain;
+    mediaStreamDestRef.current = mediaStreamDest;
+
+    return ctx;
+  }, []);
+
+  // Connect an HTMLAudioElement to the Web Audio graph
+  const connectAudioToGraph = useCallback((audio) => {
+    const ctx = ensureAudioContext();
+    try {
+      const source = ctx.createMediaElementSource(audio);
+      source.connect(speakerGainRef.current);
+      source.connect(recordingGainRef.current);
+    } catch (e) {
+      // If the element is already connected (e.g. from cache), silently ignore
+      // This can happen if cloneNode returns an already-connected node
+    }
+  }, [ensureAudioContext]);
+
+  // Start recording
+  const startRecording = useCallback(async () => {
+    try {
+      const ctx = ensureAudioContext();
+      await ctx.resume();
+
+      // Request microphone
+      const micStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+      micStreamRef.current = micStream;
+
+      // Connect mic to recording bus (NOT to speakers — no feedback)
+      // Boost mic gain so voice is prominent in the mix
+      const micGain = ctx.createGain();
+      micGain.gain.value = 2.0;
+      micGainRef.current = micGain;
+
+      const micSource = ctx.createMediaStreamSource(micStream);
+      micSource.connect(micGain);
+      micGain.connect(recordingGainRef.current);
+      micSourceRef.current = micSource;
+
+      // Duck speaker volume to reduce physical speaker bleed into mic
+      speakerGainRef.current.gain.setTargetAtTime(0.3, ctx.currentTime, 0.1);
+
+      // Determine supported MIME type
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/mp4')
+          ? 'audio/mp4'
+          : 'audio/webm';
+
+      // Create MediaRecorder from the recording stream
+      const recorder = new MediaRecorder(mediaStreamDestRef.current.stream, { mimeType });
+      recordingChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          recordingChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(recordingChunksRef.current, { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        setRecordedBlob(blob);
+        setRecordingUrl(url);
+      };
+
+      recorder.start(100); // Collect data every 100ms
+      mediaRecorderRef.current = recorder;
+
+      // Discard any previous recording
+      if (recordingUrl) {
+        URL.revokeObjectURL(recordingUrl);
+      }
+      setRecordedBlob(null);
+      setRecordingUrl(null);
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Failed to start recording:', err);
+      setLoadError('Microphone access denied or unavailable.');
+    }
+  }, [ensureAudioContext, recordingUrl]);
+
+  // Stop recording
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    mediaRecorderRef.current = null;
+
+    // Disconnect and stop mic
+    if (micGainRef.current) {
+      micGainRef.current.disconnect();
+      micGainRef.current = null;
+    }
+    if (micSourceRef.current) {
+      micSourceRef.current.disconnect();
+      micSourceRef.current = null;
+    }
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach((t) => t.stop());
+      micStreamRef.current = null;
+    }
+
+    // Restore speaker volume
+    if (audioContextRef.current && speakerGainRef.current) {
+      speakerGainRef.current.gain.setTargetAtTime(1.0, audioContextRef.current.currentTime, 0.1);
+    }
+
+    // Stop all playing audio (scene, melodies, one-shots)
+    stopAllAudio();
+
+    setIsRecording(false);
+  }, []);
+
+  // Preview playback
+  const togglePreview = useCallback(() => {
+    if (isPreviewPlaying && previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current = null;
+      setIsPreviewPlaying(false);
+      return;
+    }
+
+    if (!recordingUrl) return;
+
+    const audio = new Audio(recordingUrl);
+    audio.addEventListener('ended', () => {
+      setIsPreviewPlaying(false);
+      previewAudioRef.current = null;
+    }, { once: true });
+    audio.play().catch(() => {});
+    previewAudioRef.current = audio;
+    setIsPreviewPlaying(true);
+  }, [isPreviewPlaying, recordingUrl]);
+
+  // Save recording as MP3 (download)
+  const saveRecording = useCallback(async () => {
+    if (!recordedBlob) return;
+
+    try {
+      // Decode recorded blob to PCM
+      const arrayBuffer = await recordedBlob.arrayBuffer();
+      const ctx = audioContextRef.current || new (window.AudioContext || window.webkitAudioContext)();
+      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+      // Convert to MP3 using lamejs
+      const numChannels = audioBuffer.numberOfChannels;
+      const sampleRate = audioBuffer.sampleRate;
+      const mp3encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, 128);
+
+      const left = audioBuffer.getChannelData(0);
+      const right = numChannels > 1 ? audioBuffer.getChannelData(1) : left;
+
+      // Convert float32 to int16
+      const sampleCount = left.length;
+      const leftInt16 = new Int16Array(sampleCount);
+      const rightInt16 = new Int16Array(sampleCount);
+      for (let i = 0; i < sampleCount; i++) {
+        leftInt16[i] = Math.max(-32768, Math.min(32767, Math.round(left[i] * 32767)));
+        rightInt16[i] = Math.max(-32768, Math.min(32767, Math.round(right[i] * 32767)));
+      }
+
+      // Encode in chunks
+      const mp3Data = [];
+      const blockSize = 1152;
+      for (let i = 0; i < sampleCount; i += blockSize) {
+        const leftChunk = leftInt16.subarray(i, i + blockSize);
+        const rightChunk = rightInt16.subarray(i, i + blockSize);
+        const mp3buf = numChannels > 1
+          ? mp3encoder.encodeBuffer(leftChunk, rightChunk)
+          : mp3encoder.encodeBuffer(leftChunk);
+        if (mp3buf.length > 0) {
+          mp3Data.push(mp3buf);
+        }
+      }
+
+      const end = mp3encoder.flush();
+      if (end.length > 0) {
+        mp3Data.push(end);
+      }
+
+      const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
+      const mp3Url = URL.createObjectURL(mp3Blob);
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const a = document.createElement('a');
+      a.href = mp3Url;
+      a.download = `swampy-recording-${timestamp}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(mp3Url);
+    } catch (err) {
+      console.error('MP3 encoding failed, falling back to raw download:', err);
+      // Fallback: download as-is
+      const ext = recordedBlob.type.includes('mp4') ? 'm4a' : 'webm';
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const a = document.createElement('a');
+      a.href = recordingUrl;
+      a.download = `swampy-recording-${timestamp}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }, [recordedBlob, recordingUrl]);
+
+  // Discard recording and reset
+  const redoRecording = useCallback(() => {
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current = null;
+    }
+    if (recordingUrl) {
+      URL.revokeObjectURL(recordingUrl);
+    }
+    setRecordedBlob(null);
+    setRecordingUrl(null);
+    setIsPreviewPlaying(false);
+  }, [recordingUrl]);
 
   useEffect(() => {
     const loadManifest = async () => {
@@ -209,11 +485,18 @@ function SwampySoundboardPage() {
   };
 
   const buildPlaybackAudio = (sound, { loop = false } = {}) => {
-    const cachedAudio = audioCacheRef.current.get(sound.id);
-    const audio = cachedAudio ? cachedAudio.cloneNode() : new Audio(sound.src);
+    // Always create a fresh Audio element so we can connect it to Web Audio graph
+    // (createMediaElementSource can only be called once per element)
+    const audio = new Audio(sound.src);
     audio.preload = 'auto';
     audio.loop = loop;
     audio.currentTime = 0;
+
+    // Always route through Web Audio API (ensures recording captures everything)
+    // Safe to call here since buildPlaybackAudio is always invoked from a user gesture
+    ensureAudioContext();
+    connectAudioToGraph(audio);
+
     return audio;
   };
 
@@ -337,7 +620,7 @@ function SwampySoundboardPage() {
 
   return (
     <main
-      className="relative h-full w-full overflow-hidden p-0"
+      className={`relative h-full w-full overflow-hidden p-0 ${isRecording ? 'recording-border' : ''}`}
       style={{
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
@@ -352,13 +635,61 @@ function SwampySoundboardPage() {
           <h1 className="top-bar-title" style={{ color: '#d4a054' }}>
             Junior Recording Station
           </h1>
-          <button
-            type="button"
-            onClick={stopAllAudio}
-            className="stop-button"
-            aria-label="Stop all audio"
-            style={{ borderColor: currentSceneTheme ? currentSceneTheme.borderColor : 'rgba(120, 53, 15, 0.4)', transition: 'border-color 400ms ease' }}
-          />
+
+          {/* Recording controls */}
+          {recordingSupported && !recordedBlob && !isRecording && (
+            <button
+              type="button"
+              onClick={startRecording}
+              className="record-button"
+              aria-label="Start recording"
+              title="Record"
+            >
+              <span className="record-dot" />
+            </button>
+          )}
+
+          {isRecording && (
+            <button
+              type="button"
+              onClick={stopRecording}
+              className="record-button recording-active"
+              aria-label="Stop recording"
+              title="Stop recording"
+            >
+              <span className="record-stop-icon" />
+            </button>
+          )}
+
+          {recordedBlob && !isRecording && (
+            <div className="recording-toolbar">
+              <button
+                type="button"
+                onClick={togglePreview}
+                className="toolbar-btn toolbar-play"
+                aria-label={isPreviewPlaying ? 'Pause preview' : 'Play preview'}
+              >
+                {isPreviewPlaying ? '⏸' : '▶'}
+              </button>
+              <button
+                type="button"
+                onClick={saveRecording}
+                className="toolbar-btn toolbar-save"
+                aria-label="Save recording"
+              >
+                💾
+              </button>
+              <button
+                type="button"
+                onClick={redoRecording}
+                className="toolbar-btn toolbar-redo"
+                aria-label="Discard and re-record"
+              >
+                🔄
+              </button>
+            </div>
+          )}
+
         </header>
 
         {loadError && (
@@ -818,6 +1149,102 @@ function SwampySoundboardPage() {
         .emoji-sound-active {
           animation: tiltFloat 1.5s ease-in-out infinite, glowPulse 0.95s ease-in-out infinite;
           will-change: transform, filter;
+        }
+
+        /* Recording UI styles */
+        .record-button {
+          width: 2.25rem;
+          height: 2.25rem;
+          flex-shrink: 0;
+          border-radius: 50%;
+          background: #1a1a1a;
+          border: 3px solid #666;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+          cursor: pointer;
+          display: grid;
+          place-items: center;
+          transition: transform 150ms ease, box-shadow 150ms ease, border-color 300ms ease;
+        }
+
+        .record-button:active {
+          transform: scale(0.9);
+        }
+
+        .record-button.recording-active {
+          border-color: #dc2626;
+          animation: recordingPulse 1.2s ease-in-out infinite;
+        }
+
+        .record-dot {
+          width: 0.9rem;
+          height: 0.9rem;
+          border-radius: 50%;
+          background: #dc2626;
+        }
+
+        .record-stop-icon {
+          width: 0.75rem;
+          height: 0.75rem;
+          border-radius: 2px;
+          background: #dc2626;
+        }
+
+        @keyframes recordingPulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4), 0 4px 10px rgba(0, 0, 0, 0.3);
+          }
+          50% {
+            box-shadow: 0 0 0 6px rgba(220, 38, 38, 0), 0 4px 10px rgba(0, 0, 0, 0.3);
+          }
+        }
+
+        .recording-toolbar {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
+        .toolbar-btn {
+          width: 2rem;
+          height: 2rem;
+          flex-shrink: 0;
+          border-radius: 50%;
+          border: 2px solid #555;
+          background: #2e2e2e;
+          color: white;
+          font-size: 0.85rem;
+          cursor: pointer;
+          display: grid;
+          place-items: center;
+          transition: transform 150ms ease, background 150ms ease;
+        }
+
+        .toolbar-btn:active {
+          transform: scale(0.9);
+          background: #444;
+        }
+
+        .toolbar-play {
+          border-color: #22c55e;
+        }
+
+        .toolbar-save {
+          border-color: #3b82f6;
+        }
+
+        .toolbar-redo {
+          border-color: #f59e0b;
+        }
+
+        /* Recording indicator border on the main area */
+        .recording-border {
+          box-shadow: inset 0 0 0 3px rgba(220, 38, 38, 0.6);
+          animation: recordingBorderPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes recordingBorderPulse {
+          0%, 100% { box-shadow: inset 0 0 0 3px rgba(220, 38, 38, 0.3); }
+          50% { box-shadow: inset 0 0 0 3px rgba(220, 38, 38, 0.7); }
         }
       `}</style>
     </main>
