@@ -248,28 +248,51 @@ function SwampySoundboardPage() {
         mp3Data.push(end);
       }
 
-      const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
-      const mp3Url = URL.createObjectURL(mp3Blob);
-
+      const mp3Blob = new Blob(mp3Data, { type: 'audio/mpeg' });
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      const a = document.createElement('a');
-      a.href = mp3Url;
-      a.download = `swampy-recording-${timestamp}.mp3`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(mp3Url);
+      const fileName = `swampy-recording-${timestamp}.mp3`;
+
+      // Use Web Share API on mobile (reliable file saving on iOS/Android)
+      if (navigator.canShare && navigator.canShare({ files: [new File([mp3Blob], fileName, { type: 'audio/mpeg' })] })) {
+        const file = new File([mp3Blob], fileName, { type: 'audio/mpeg' });
+        try {
+          await navigator.share({ files: [file], title: 'Swampy Recording' });
+        } catch (shareErr) {
+          if (shareErr.name !== 'AbortError') {
+            const mp3Url = URL.createObjectURL(mp3Blob);
+            window.open(mp3Url, '_blank');
+          }
+        }
+      } else {
+        // Desktop fallback: anchor download
+        const mp3Url = URL.createObjectURL(mp3Blob);
+        const a = document.createElement('a');
+        a.href = mp3Url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(mp3Url), 5000);
+      }
     } catch (err) {
-      console.error('MP3 encoding failed, falling back to raw download:', err);
-      // Fallback: download as-is
+      console.error('MP3 encoding failed, falling back to raw share:', err);
       const ext = recordedBlob.type.includes('mp4') ? 'm4a' : 'webm';
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      const a = document.createElement('a');
-      a.href = recordingUrl;
-      a.download = `swampy-recording-${timestamp}.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const fileName = `swampy-recording-${timestamp}.${ext}`;
+      const file = new File([recordedBlob], fileName, { type: recordedBlob.type });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Swampy Recording' }).catch(() => {
+          window.open(recordingUrl, '_blank');
+        });
+      } else {
+        const a = document.createElement('a');
+        a.href = recordingUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
     }
   }, [recordedBlob, recordingUrl]);
 
