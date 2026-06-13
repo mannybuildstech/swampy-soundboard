@@ -746,8 +746,6 @@ function SwampySoundboardPage() {
             <section
               ref={stageRef}
               className="row-panel story-canvas"
-              onTouchStart={handleStageTouchStart}
-              onTouchMove={handleStageTouchMove}
               style={{
                 backgroundColor: '#2d6a4f',
                 backgroundImage: activeSceneImage ? `url(${activeSceneImage})` : 'none',
@@ -766,7 +764,9 @@ function SwampySoundboardPage() {
                 <div
                   ref={storyGroundRef}
                   className="storybook-ground"
-                  style={{ gridTemplateColumns: `repeat(${sectionData.characters.length}, 25%)` }}
+                  onTouchStart={handleStageTouchStart}
+                  onTouchMove={handleStageTouchMove}
+                  style={{ gridTemplateColumns: `repeat(${sectionData.characters.length}, 25%)`, touchAction: 'pan-y' }}
                 >
                   {sectionData.characters.map((character) => {
                     const isActive = activeOneShots.has(character.id);

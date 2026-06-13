@@ -32,13 +32,13 @@
         overflow: hidden;
       }
 
-      /* Force landscape layout when device is in portrait */
+      /* Force landscape layout when device is in portrait and NOT fullscreen */
       @media (orientation: portrait) and (max-width: 1024px) {
-        html, body {
+        html:not(:fullscreen):not(:-webkit-full-screen) body {
           width: 100vw;
           height: 100svh;
         }
-        #root {
+        html:not(:fullscreen):not(:-webkit-full-screen) #root {
           transform: rotate(90deg);
           transform-origin: top left;
           width: 100svh;
@@ -51,16 +51,23 @@
       }
     </style>
     <script>
-      // Lock orientation on first user interaction (no fullscreen)
-      function requestLandscape() {
+      // Request fullscreen + lock orientation on first user interaction
+      function requestImmersive() {
+        // Fullscreen hides URL bar and navigation buttons
+        var el = document.documentElement;
+        var rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+        if (rfs) {
+          rfs.call(el).catch(function() {});
+        }
+        // Lock to landscape
         if (screen.orientation && screen.orientation.lock) {
           screen.orientation.lock('landscape').catch(function() {});
         }
-        document.removeEventListener('click', requestLandscape);
-        document.removeEventListener('touchstart', requestLandscape);
+        document.removeEventListener('click', requestImmersive);
+        document.removeEventListener('touchstart', requestImmersive);
       }
-      document.addEventListener('click', requestLandscape, { once: true });
-      document.addEventListener('touchstart', requestLandscape, { once: true });
+      document.addEventListener('click', requestImmersive, { once: true });
+      document.addEventListener('touchstart', requestImmersive, { once: true });
     </script>
     <script type="text/babel" data-presets="react" src="./app.jsx"></script>
   </body>
